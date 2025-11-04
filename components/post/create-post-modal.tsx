@@ -171,7 +171,7 @@ export function CreatePostModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="w-full max-w-2xl sm:max-w-2xl max-h-[90vh] min-h-[400px] overflow-y-auto p-6">
+      <DialogContent className="!max-w-[700px] !w-[90vw] sm:!w-[600px] lg:!w-[700px] sm:!max-w-[600px] lg:!max-w-[700px] max-h-[90vh] min-h-[400px] overflow-y-auto p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-[var(--font-size-lg)] font-semibold text-[var(--instagram-text)]">
             새 게시물 만들기
