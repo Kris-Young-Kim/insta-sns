@@ -67,6 +67,21 @@ export default function ProfilePage() {
   const handleFollow = async () => {
     if (!profileData) return;
 
+    // 낙관적 업데이트: 즉시 UI 반영
+    const previousData = profileData;
+    setProfileData((prev) =>
+      prev
+        ? {
+            ...prev,
+            isFollowing: true,
+            stats: {
+              ...prev.stats,
+              followers_count: prev.stats.followers_count + 1,
+            },
+          }
+        : null
+    );
+
     try {
       const response = await fetch("/api/follows", {
         method: "POST",
@@ -80,27 +95,32 @@ export default function ProfilePage() {
         throw new Error("팔로우에 실패했습니다.");
       }
 
-      // 로컬 상태 업데이트
-      setProfileData((prev) =>
-        prev
-          ? {
-              ...prev,
-              isFollowing: true,
-              stats: {
-                ...prev.stats,
-                followers_count: prev.stats.followers_count + 1,
-              },
-            }
-          : null
-      );
+      console.log("팔로우 성공:", userId);
     } catch (error) {
       console.error("팔로우 에러:", error);
+      // 에러 발생 시 롤백
+      setProfileData(previousData);
     }
   };
 
   // 언팔로우 처리
   const handleUnfollow = async () => {
     if (!profileData) return;
+
+    // 낙관적 업데이트: 즉시 UI 반영
+    const previousData = profileData;
+    setProfileData((prev) =>
+      prev
+        ? {
+            ...prev,
+            isFollowing: false,
+            stats: {
+              ...prev.stats,
+              followers_count: Math.max(0, prev.stats.followers_count - 1),
+            },
+          }
+        : null
+    );
 
     try {
       const response = await fetch(`/api/follows?following_id=${userId}`, {
@@ -111,21 +131,11 @@ export default function ProfilePage() {
         throw new Error("언팔로우에 실패했습니다.");
       }
 
-      // 로컬 상태 업데이트
-      setProfileData((prev) =>
-        prev
-          ? {
-              ...prev,
-              isFollowing: false,
-              stats: {
-                ...prev.stats,
-                followers_count: Math.max(0, prev.stats.followers_count - 1),
-              },
-            }
-          : null
-      );
+      console.log("언팔로우 성공:", userId);
     } catch (error) {
       console.error("언팔로우 에러:", error);
+      // 에러 발생 시 롤백
+      setProfileData(previousData);
     }
   };
 

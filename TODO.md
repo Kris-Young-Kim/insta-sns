@@ -94,10 +94,10 @@
 
 ## 12. 팔로우/언팔로우 기능
 
-- [ ] 팔로우 버튼 클릭 시 팔로우 처리
-- [ ] 언팔로우 기능
-- [ ] 즉시 UI 반영 (낙관적 업데이트)
-- [ ] API Route: `/api/follows` (POST/DELETE)
+- [x] 팔로우 버튼 클릭 시 팔로우 처리
+- [x] 언팔로우 기능
+- [x] 즉시 UI 반영 (낙관적 업데이트)
+- [x] API Route: `/api/follows` (POST, DELETE)
 
 ## 13. API Route 구축
 
