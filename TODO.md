@@ -1,44 +1,148 @@
 # INSIDE 프로젝트 TODO
 
-## 1. 환경 세팅
-- [ ] Next.js 14 + TypeScript + Tailwind CSS 프로젝트 초기화
-- [ ] Supabase 프로젝트 생성 및 연결
-- [ ] Clerk 인증 연동 (이메일+소셜, 한글화)
-- [ ] Tailwind에 인스타그램 기반 컬러·폰트 커스텀
+## 1. 환경 세팅 및 기초 설정
+
+- [x] Next.js 15 + TypeScript + Tailwind CSS v4 프로젝트 초기화 확인
+- [x] Supabase 프로젝트 생성 및 연결 (환경변수 설정)
+- [x] Clerk 인증 연동 (이메일+소셜 로그인, 한글화 설정)
+- [ ] Tailwind CSS에 Instagram 기반 컬러·폰트 커스텀 변수 설정
+- [ ] 디렉토리 구조 생성: `app/(auth)`, `app/(main)`, `components/layout`, `components/post`, `components/comment`, `components/profile`
 
 ## 2. DB/스토리지 구조 설계 및 구축
-- [ ] users, posts, comments, likes, follows 테이블 설계 및 생성
-- [ ] Supabase Storage 버킷 구축(이미지 전용)
 
-## 3. 레이아웃 / 반응형
-- [ ] Desktop 사이드바, Tablet 아이콘 사이드바, Mobile 헤더+BottomNav 구현
-- [ ] Global layout 세팅 및 라우팅 그룹 분리
+- [x] users 테이블 생성 (Clerk 동기화 필드 포함)
+- [ ] posts 테이블 생성 (이미지 URL, 캡션, 작성자, 생성일시)
+- [ ] comments 테이블 생성 (포스트 ID, 작성자, 내용, 생성일시)
+- [ ] likes 테이블 생성 (포스트 ID, 사용자 ID, 생성일시)
+- [ ] follows 테이블 생성 (팔로워 ID, 팔로잉 ID, 생성일시)
+- [x] Supabase Storage 버킷 구축 (이미지 전용, RLS 비활성화)
+- [x] 마이그레이션 파일 생성 및 적용
 
-## 4. 기능별 컴포넌트 개발
-- [ ] PostCard (헤더, 이미지, 액션, 컨텐츠)
-- [ ] PostFeed (홈피드, 무한스크롤)
-- [ ] CreatePostModal (포스트 작성)
-- [ ] PostModal (상세, 댓글리스트)
-- [ ] CommentList & CommentForm
-- [ ] 프로필: ProfileHeader, PostGrid 3열
+## 3. 레이아웃 / 반응형 구현
 
-## 5. API Route 구축
-- [ ] /api/posts (GET/POST)
-- [ ] /api/likes (POST/DELETE)
-- [ ] /api/comments (POST/DELETE)
-- [ ] /api/follows (POST/DELETE)
-- [ ] /api/users/[userId] (GET)
+- [x] Global layout 세팅 (`app/layout.tsx`)
+- [ ] 라우팅 그룹 분리: `app/(auth)` (로그인/회원가입), `app/(main)` (메인 피드)
+- [ ] Desktop 레이아웃: Sidebar 244px (텍스트+아이콘) + 메인피드 630px + 여분 공간
+- [ ] Tablet 레이아웃: Sidebar 72px (아이콘 전용) + 메인 100%
+- [ ] Mobile 레이아웃: 상단 헤더(로고+아이콘) + 메인 콘텐츠 + 하단 네비게이션(5개 아이콘)
+- [ ] 반응형 브레이크포인트 테스트
 
-## 6. 유저 상호작용 및 애니메이션 구현
-- [ ] 하트 클릭/더블탭 애니메이션
-- [ ] 무한 스크롤 Intersection Observer
-- [ ] Skeleton/로딩 UI 구현
+## 4. Sidebar 컴포넌트 구현
 
-## 7. 최종 QA/배포
-- [ ] 모바일~데스크탑 반응형 QA
-- [ ] 예외/에러 핸들링 보강
-- [ ] Vercel 배포 & README 작성
+- [ ] Desktop 사이드바: Lucide React 아이콘 + 텍스트 레이블
+- [ ] Tablet 사이드바: 아이콘만 표시 (72px)
+- [ ] Active 상태 스타일링 (현재 위치 강조)
+- [ ] Hover 효과 구현
+- [ ] 네비게이션 메뉴: 홈, 탐색, 생성, 프로필, 설정 등
 
-## 8. 2차 확장 아이디어(설계만)
-- [ ] 메시지/DM, 트렌드(추천), 공개범위, 위치·스팟 태그 설계
-- [ ] 프로필 커스터마이징
+## 5. PostCard 컴포넌트 개발
+
+- [ ] Header: 아바타, 닉네임, 시간, 메뉴(3점) 버튼
+- [ ] 이미지: 정사각형 비율, 반응형 처리
+- [ ] 액션 바: 하트 아이콘(좋아요 상태에 따라 filled/outline), 댓글 아이콘, 공유 아이콘
+- [ ] 좋아요 카운트 표시 (실시간 업데이트)
+- [ ] 캡션: 2줄 초과 시 "더보기" 버튼, 클릭 시 전체 표시
+- [ ] 댓글 미리보기: 최근 2개 댓글 표시
+
+## 6. PostFeed 컴포넌트 개발
+
+- [ ] 홈 피드 목록 조회 (최신순 정렬)
+- [ ] 무한 스크롤 구현 (Intersection Observer)
+- [ ] 로딩 상태: Skeleton UI 표시
+- [ ] 빈 피드 상태 처리
+
+## 7. 포스트 작성 기능
+
+- [ ] CreatePostModal 컴포넌트 구현
+- [ ] 이미지 업로드 (1개, 파일 선택 및 미리보기)
+- [ ] 캡션 입력 (텍스트 에리어)
+- [ ] 업로드 버튼 (유효성 검사: 이미지 필수)
+- [ ] Supabase Storage에 이미지 업로드
+- [ ] posts 테이블에 데이터 저장
+
+## 8. 좋아요 기능 구현
+
+- [ ] 하트 아이콘 클릭 시 좋아요 토글
+- [ ] 더블탭 제스처로 좋아요 (모바일)
+- [ ] 좋아요 애니메이션 (하트 확대/축소)
+- [ ] 실시간 좋아요 카운트 반영
+- [ ] API Route: `/api/likes` (POST/DELETE)
+
+## 9. 댓글 기능 구현
+
+- [ ] CommentForm: 댓글 작성 입력란
+- [ ] CommentList: 댓글 목록 표시 (2줄 미리보기)
+- [ ] 댓글 상세보기: PostModal 내 댓글 리스트 (스크롤 가능)
+- [ ] 댓글 삭제 기능 (본인 댓글만)
+- [ ] API Route: `/api/comments` (POST/DELETE)
+
+## 10. PostModal (상세보기) 구현
+
+- [ ] 모달 오버레이 및 레이아웃
+- [ ] 이미지 영역 (50% 너비, 왼쪽)
+- [ ] 댓글 영역 (50% 너비, 오른쪽, 스크롤 가능)
+- [ ] 댓글 리스트 스크롤 구현
+- [ ] 모달 닫기 기능
+
+## 11. 프로필 페이지 구현
+
+- [ ] ProfileHeader: 큰 아바타, 팔로워/팔로잉 카운트, 팔로우 버튼
+- [ ] 본인 프로필 vs 타인 프로필 분기 처리
+- [ ] PostGrid: 3열 그리드 레이아웃
+- [ ] 게시물 호버 시 좋아요/댓글 수 표시
+- [ ] API Route: `/api/users/[userId]` (GET)
+
+## 12. 팔로우/언팔로우 기능
+
+- [ ] 팔로우 버튼 클릭 시 팔로우 처리
+- [ ] 언팔로우 기능
+- [ ] 즉시 UI 반영 (낙관적 업데이트)
+- [ ] API Route: `/api/follows` (POST/DELETE)
+
+## 13. API Route 구축
+
+- [ ] `/api/posts` - GET (목록 조회, 페이지네이션), POST (생성)
+- [ ] `/api/likes` - POST (좋아요), DELETE (좋아요 취소)
+- [ ] `/api/comments` - POST (댓글 작성), DELETE (댓글 삭제)
+- [ ] `/api/follows` - POST (팔로우), DELETE (언팔로우)
+- [ ] `/api/users/[userId]` - GET (사용자 정보 조회)
+- [ ] 모든 API에 Clerk 인증 미들웨어 적용
+- [ ] 에러 핸들링 및 응답 형식 통일
+
+## 14. 애니메이션 및 UI/UX 개선
+
+- [ ] 하트 클릭 애니메이션 (확대/축소, 색상 변화)
+- [ ] 더블탭 제스처 감지 및 애니메이션
+- [ ] 버튼 클릭 피드백 (ripple 효과)
+- [ ] Skeleton 로딩 UI (이미지, 텍스트)
+- [ ] Shimmer 효과 (로딩 중)
+- [ ] 페이지 전환 애니메이션
+
+## 15. 디자인 시스템 완성
+
+- [ ] Instagram 기반 컬러 팔레트 정의 (Tailwind 커스텀)
+- [ ] 폰트 체계 정의 (크기, 굵기, 행간)
+- [ ] 간격 시스템 정의 (spacing scale)
+- [ ] 컴포넌트 스타일 가이드 문서화
+
+## 16. 최종 QA 및 배포 준비
+
+- [ ] 모바일 반응형 QA (320px ~ 768px)
+- [ ] 태블릿 반응형 QA (768px ~ 1024px)
+- [ ] 데스크탑 반응형 QA (1024px 이상)
+- [ ] 예외 상황 처리: 네트워크 오류, 권한 오류, 빈 데이터
+- [ ] 에러 핸들링 보강 (사용자 친화적 메시지)
+- [ ] 성능 최적화 (이미지 최적화, 코드 스플리팅)
+- [ ] Vercel 배포 설정
+- [ ] 환경변수 설정 (프로덕션)
+- [ ] README.md 작성 (설치, 실행, 배포 가이드)
+
+## 17. 2차 확장 아이디어 (설계 단계)
+
+- [ ] 게시글 공개범위 기능 설계 (전체/친구/나만)
+- [ ] 트렌드 큐레이션 설계 (실시간 인기 게시물, 키워드 추천)
+- [ ] 스팟 태그 기능 설계 (위치 기반, 모임 태그)
+- [ ] DM(메시지) 기능 설계
+- [ ] 알림 시스템 설계
+- [ ] 해시태그 및 검색 기능 설계
+- [ ] 프로필 커스터마이징 설계 (바이오, 링크, 테마)
