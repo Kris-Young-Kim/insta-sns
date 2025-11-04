@@ -46,10 +46,10 @@
 
 ## 6. PostFeed 컴포넌트 개발
 
-- [ ] 홈 피드 목록 조회 (최신순 정렬)
-- [ ] 무한 스크롤 구현 (Intersection Observer)
-- [ ] 로딩 상태: Skeleton UI 표시
-- [ ] 빈 피드 상태 처리
+- [x] 홈 피드 목록 조회 (최신순 정렬)
+- [x] 무한 스크롤 구현 (Intersection Observer)
+- [x] 로딩 상태: Skeleton UI 표시
+- [x] 빈 피드 상태 처리
 
 ## 7. 포스트 작성 기능
 
