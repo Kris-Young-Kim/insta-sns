@@ -10,21 +10,63 @@
 
 import { PostFeed, PostModal } from "@/components/post";
 import { Post } from "@/types/post";
-import { useState } from "react";
-
-// 임시 데이터 (나중에 API로 교체)
-const mockPosts: Post[] = [];
+import { useState, useEffect } from "react";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { getErrorMessage } from "@/lib/utils/error-handler";
+import { EmptyState } from "@/components/empty-state";
+import { ImageOff } from "lucide-react";
 
 export default function HomePage() {
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 게시물 로드 함수 (나중에 API로 교체)
+  // 초기 게시물 로드
+  useEffect(() => {
+    loadInitialPosts();
+  }, []);
+
+  const loadInitialPosts = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/posts?page=1&limit=10");
+      if (!response.ok) {
+        throw new Error("게시물을 불러올 수 없습니다.");
+      }
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        setPosts(data.data);
+      }
+    } catch (err) {
+      console.error("게시물 로드 에러:", err);
+      setError(getErrorMessage(err));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 게시물 로드 함수
   const loadPosts = async (page: number): Promise<Post[]> => {
-    // TODO: 실제 API 호출로 교체
-    console.log("게시물 로드:", page);
-    return [];
+    try {
+      const response = await fetch(`/api/posts?page=${page}&limit=10`);
+      if (!response.ok) {
+        throw new Error("게시물을 불러올 수 없습니다.");
+      }
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        return data.data;
+      }
+      return [];
+    } catch (err) {
+      console.error("게시물 로드 에러:", err);
+      throw err;
+    }
   };
 
   // 좋아요 처리 함수
@@ -158,23 +200,56 @@ export default function HomePage() {
     }
   };
 
-  return (
-    <div className="py-4 page-transition">
-      <PostFeed
-        initialPosts={posts}
-        onLoadMore={loadPosts}
-        onLike={handleLike}
-        onCommentClick={handleCommentClick}
-      />
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center">
+          <p className="text-[var(--instagram-error)] mb-4">{error}</p>
+          <button
+            onClick={loadInitialPosts}
+            className="text-[var(--instagram-link)] hover:underline"
+          >
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-      {/* 포스트 상세보기 모달 */}
-      <PostModal
-        post={selectedPost}
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        onCommentSubmit={handleCommentSubmit}
-        onCommentDelete={handleCommentDelete}
-      />
-    </div>
+  return (
+    <ErrorBoundary>
+      <div className="py-4 page-transition">
+        {isLoading ? (
+          <PostFeed
+            initialPosts={[]}
+            onLoadMore={loadPosts}
+            onLike={handleLike}
+            onCommentClick={handleCommentClick}
+          />
+        ) : posts.length === 0 ? (
+          <EmptyState
+            icon={ImageOff}
+            title="게시물이 없습니다"
+            description="첫 게시물을 작성해보세요!"
+          />
+        ) : (
+          <PostFeed
+            initialPosts={posts}
+            onLoadMore={loadPosts}
+            onLike={handleLike}
+            onCommentClick={handleCommentClick}
+          />
+        )}
+
+        {/* 포스트 상세보기 모달 */}
+        <PostModal
+          post={selectedPost}
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          onCommentSubmit={handleCommentSubmit}
+          onCommentDelete={handleCommentDelete}
+        />
+      </div>
+    </ErrorBoundary>
   );
 }
