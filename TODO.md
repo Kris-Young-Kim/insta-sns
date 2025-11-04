@@ -86,11 +86,11 @@
 
 ## 11. 프로필 페이지 구현
 
-- [ ] ProfileHeader: 큰 아바타, 팔로워/팔로잉 카운트, 팔로우 버튼
-- [ ] 본인 프로필 vs 타인 프로필 분기 처리
-- [ ] PostGrid: 3열 그리드 레이아웃
-- [ ] 게시물 호버 시 좋아요/댓글 수 표시
-- [ ] API Route: `/api/users/[userId]` (GET)
+- [x] ProfileHeader: 큰 아바타, 팔로워/팔로잉 카운트, 팔로우 버튼
+- [x] 본인 프로필 vs 타인 프로필 분기 처리
+- [x] PostGrid: 3열 그리드 레이아웃
+- [x] 게시물 호버 시 좋아요/댓글 수 표시
+- [x] API Route: `/api/users/[userId]` (GET)
 
 ## 12. 팔로우/언팔로우 기능
 
