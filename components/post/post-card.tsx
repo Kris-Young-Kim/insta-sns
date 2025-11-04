@@ -20,6 +20,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from "lucide-react";
 import { Post, Comment } from "@/types/post";
+import { CommentList } from "@/components/comment";
 
 interface PostCardProps {
   post: Post;
@@ -42,8 +43,7 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
     ? post.caption.substring(0, 100) + "..."
     : post.caption;
 
-  // 최근 2개 댓글만 표시
-  const previewComments = comments.slice(0, 2);
+  // 댓글 미리보기는 CommentList 컴포넌트에서 처리
 
   // 시간 포맷팅
   const formatTimeAgo = (dateString: string): string => {
@@ -249,41 +249,22 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
         )}
 
         {/* 댓글 미리보기: 최근 2개 */}
-        {previewComments.length > 0 && (
-          <div className="mb-2">
-            {previewComments.length < (comments.length || 0) && (
-              <button
-                onClick={() => onCommentClick?.(post.id)}
-                className="text-[var(--font-size-sm)] text-[var(--instagram-text-secondary)] mb-2 hover:opacity-50"
-              >
-                댓글 {comments.length}개 모두 보기
-              </button>
-            )}
-            {previewComments.map((comment) => (
-              <div key={comment.id} className="mb-1">
-                <span className="text-[var(--font-size-sm)] text-[var(--instagram-text)]">
-                  <Link
-                    href={`/profile/${comment.user_id}`}
-                    className="font-semibold hover:opacity-50 mr-2"
-                  >
-                    {comment.user?.name || "사용자"}
-                  </Link>
-                  <span>{comment.content}</span>
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* 댓글 작성 버튼 (있으면) */}
-        {comments.length === 0 && (
-          <button
-            onClick={() => onCommentClick?.(post.id)}
-            className="text-[var(--font-size-sm)] text-[var(--instagram-text-secondary)] mb-2 hover:opacity-50"
-          >
-            댓글 달기...
-          </button>
-        )}
+        <div className="mb-2">
+          <CommentList
+            comments={comments}
+            postId={post.id}
+            preview={true}
+            onShowMore={() => onCommentClick?.(post.id)}
+          />
+          {comments.length === 0 && (
+            <button
+              onClick={() => onCommentClick?.(post.id)}
+              className="text-[var(--font-size-sm)] text-[var(--instagram-text-secondary)] hover:opacity-50"
+            >
+              댓글 달기...
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );

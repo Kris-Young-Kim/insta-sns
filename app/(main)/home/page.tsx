@@ -8,15 +8,17 @@
 
 "use client";
 
-import { PostFeed } from "@/components/post";
+import { PostFeed, PostModal } from "@/components/post";
 import { Post } from "@/types/post";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 // 임시 데이터 (나중에 API로 교체)
 const mockPosts: Post[] = [];
 
 export default function HomePage() {
   const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 게시물 로드 함수 (나중에 API로 교체)
   const loadPosts = async (page: number): Promise<Post[]> => {
@@ -89,8 +91,71 @@ export default function HomePage() {
 
   // 댓글 클릭 처리
   const handleCommentClick = (postId: string) => {
-    // TODO: 댓글 모달 열기
-    console.log("댓글 클릭:", postId);
+    const post = posts.find((p) => p.id === postId);
+    if (post) {
+      setSelectedPost(post);
+      setIsModalOpen(true);
+    }
+  };
+
+  // 댓글 작성 처리
+  const handleCommentSubmit = async (postId: string, content: string): Promise<void> => {
+    try {
+      const response = await fetch("/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ post_id: postId, content }),
+      });
+
+      if (!response.ok) {
+        throw new Error("댓글 작성에 실패했습니다.");
+      }
+
+      // 댓글 수 업데이트
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                comments_count: (post.comments_count || 0) + 1,
+              }
+            : post
+        )
+      );
+    } catch (error) {
+      console.error("댓글 작성 에러:", error);
+      throw error;
+    }
+  };
+
+  // 댓글 삭제 처리
+  const handleCommentDelete = async (commentId: string): Promise<void> => {
+    try {
+      const response = await fetch(`/api/comments?comment_id=${commentId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("댓글 삭제에 실패했습니다.");
+      }
+
+      // 댓글 수 업데이트 (선택된 포스트의 경우)
+      if (selectedPost) {
+        setSelectedPost((prev) =>
+          prev
+            ? {
+                ...prev,
+                comments_count: Math.max(0, (prev.comments_count || 0) - 1),
+              }
+            : null
+        );
+      }
+    } catch (error) {
+      console.error("댓글 삭제 에러:", error);
+      throw error;
+    }
   };
 
   return (
@@ -100,6 +165,15 @@ export default function HomePage() {
         onLoadMore={loadPosts}
         onLike={handleLike}
         onCommentClick={handleCommentClick}
+      />
+
+      {/* 포스트 상세보기 모달 */}
+      <PostModal
+        post={selectedPost}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onCommentSubmit={handleCommentSubmit}
+        onCommentDelete={handleCommentDelete}
       />
     </div>
   );
