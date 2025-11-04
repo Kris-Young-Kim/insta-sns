@@ -19,13 +19,15 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const showAll = searchParams.get("all") === "true"; // 탐색 페이지용: 모든 게시물 조회
     const offset = (page - 1) * limit;
 
     // 현재 사용자 정보 조회 (팔로우한 사용자 확인용)
     let currentUserId: string | null = null;
     let followingUserIds: string[] = [];
 
-    if (userId) {
+    if (userId && !showAll) {
+      // 탐색 페이지가 아닌 경우에만 팔로우 필터 적용
       const { data: currentUserData } = await supabase
         .from("users")
         .select("id")
@@ -43,10 +45,21 @@ export async function GET(req: NextRequest) {
 
         followingUserIds = followsData?.map((f) => f.following_id) || [];
       }
+    } else if (userId && showAll) {
+      // 탐색 페이지인 경우: 좋아요 여부 확인을 위해 사용자 ID만 조회
+      const { data: currentUserData } = await supabase
+        .from("users")
+        .select("id")
+        .eq("clerk_id", userId)
+        .single();
+
+      if (currentUserData) {
+        currentUserId = currentUserData.id;
+      }
     }
 
-    // 게시물 조회 (팔로우한 사용자 + 본인 게시물)
-    // 로그인하지 않은 경우: 모든 게시물 조회
+    // 게시물 조회
+    // 탐색 페이지(all=true) 또는 로그인하지 않은 경우: 모든 게시물 조회
     let query = supabase
       .from("posts")
       .select(`
@@ -56,12 +69,15 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
-    // 로그인한 경우: 팔로우한 사용자 + 본인 게시물만 조회
-    if (currentUserId && followingUserIds.length > 0) {
-      query = query.in("user_id", [currentUserId, ...followingUserIds]);
-    } else if (currentUserId) {
-      // 팔로우한 사용자가 없으면 본인 게시물만 조회
-      query = query.eq("user_id", currentUserId);
+    // 탐색 페이지가 아닌 경우에만 팔로우 필터 적용
+    if (!showAll) {
+      // 로그인한 경우: 팔로우한 사용자 + 본인 게시물만 조회
+      if (currentUserId && followingUserIds.length > 0) {
+        query = query.in("user_id", [currentUserId, ...followingUserIds]);
+      } else if (currentUserId) {
+        // 팔로우한 사용자가 없으면 본인 게시물만 조회
+        query = query.eq("user_id", currentUserId);
+      }
     }
 
     const { data: postsData, error: postsError } = await query;
@@ -108,10 +124,13 @@ export async function GET(req: NextRequest) {
 
     // 총 게시물 수 조회 (페이지네이션을 위해)
     let countQuery = supabase.from("posts").select("*", { count: "exact", head: true });
-    if (currentUserId && followingUserIds.length > 0) {
-      countQuery = countQuery.in("user_id", [currentUserId, ...followingUserIds]);
-    } else if (currentUserId) {
-      countQuery = countQuery.eq("user_id", currentUserId);
+    if (!showAll) {
+      // 탐색 페이지가 아닌 경우에만 팔로우 필터 적용
+      if (currentUserId && followingUserIds.length > 0) {
+        countQuery = countQuery.in("user_id", [currentUserId, ...followingUserIds]);
+      } else if (currentUserId) {
+        countQuery = countQuery.eq("user_id", currentUserId);
+      }
     }
 
     const { count } = await countQuery;

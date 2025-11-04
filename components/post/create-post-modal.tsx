@@ -171,22 +171,22 @@ export function CreatePostModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-full max-w-2xl sm:max-w-2xl max-h-[90vh] min-h-[400px] overflow-y-auto p-6">
         <DialogHeader>
           <DialogTitle className="text-center text-[var(--font-size-lg)] font-semibold text-[var(--instagram-text)]">
             새 게시물 만들기
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           {/* 이미지 선택 영역 */}
           {!previewUrl ? (
-            <div className="flex flex-col items-center justify-center border-2 border-dashed border-[var(--instagram-border)] rounded-lg p-12">
+            <div className="flex flex-col items-center justify-center border-2 border-dashed border-[var(--instagram-border)] rounded-lg p-8 sm:p-12 min-h-[200px]">
               <Upload size={48} className="text-[var(--instagram-text-secondary)] mb-4" />
               <Button
                 onClick={handleSelectFile}
                 variant="outline"
-                className="text-[var(--font-size-sm)]"
+                className="text-[var(--font-size-sm)] min-w-[120px]"
               >
                 사진 선택
               </Button>
@@ -197,12 +197,12 @@ export function CreatePostModal({
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              <p className="text-[var(--font-size-xs)] text-[var(--instagram-text-secondary)] mt-2">
+              <p className="text-[var(--font-size-xs)] text-[var(--instagram-text-secondary)] mt-2 text-center">
                 JPG, PNG, GIF 파일 (최대 6MB)
               </p>
             </div>
           ) : (
-            <div className="relative w-full aspect-square bg-[var(--instagram-bg-secondary)] rounded-lg overflow-hidden">
+            <div className="relative w-full aspect-square max-h-[400px] bg-[var(--instagram-bg-secondary)] rounded-lg overflow-hidden">
               <Image
                 src={previewUrl}
                 alt="미리보기"
@@ -211,7 +211,7 @@ export function CreatePostModal({
               />
               <button
                 onClick={handleRemoveFile}
-                className="absolute top-2 right-2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+                className="absolute top-2 right-2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors z-10"
                 aria-label="이미지 제거"
               >
                 <X size={20} className="text-white" />
@@ -220,15 +220,15 @@ export function CreatePostModal({
           )}
 
           {/* 캡션 입력 */}
-          <div className="space-y-2">
-            <label className="text-[var(--font-size-sm)] font-medium text-[var(--instagram-text)]">
+          <div className="space-y-2 flex-1">
+            <label className="text-[var(--font-size-sm)] font-medium text-[var(--instagram-text)] block">
               캡션
             </label>
             <Textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               placeholder="캡션을 입력하세요..."
-              className="min-h-[120px] resize-none"
+              className="min-h-[120px] resize-none w-full"
               maxLength={2200}
             />
             <div className="flex justify-between items-center">
