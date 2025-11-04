@@ -10,29 +10,36 @@
 
 import { PostFeed, PostModal } from "@/components/post";
 import { Post } from "@/types/post";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { EmptyState } from "@/components/empty-state";
 import { ImageOff } from "lucide-react";
 import { apiGet, apiPost, apiDelete } from "@/lib/utils/api-client";
 
-export default function HomePage() {
+function HomePageContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 초기 게시물 로드
+  // 초기 게시물 로드 및 pathname/searchParams 변경 시 강력 새로고침 (캐시 우회)
   useEffect(() => {
+    console.log("홈 페이지 새로고침 시작:", { pathname, refresh: searchParams.get("refresh") });
     loadInitialPosts();
-  }, []);
+  }, [pathname, searchParams]);
 
   const loadInitialPosts = async () => {
     setIsLoading(true);
     setError(null);
 
-    const result = await apiGet<Post[]>("/api/posts?page=1&limit=10");
+    // 캐시 우회를 위한 timestamp 추가
+    const timestamp = Date.now();
+    const result = await apiGet<Post[]>(`/api/posts?page=1&limit=10&_t=${timestamp}`);
 
     if (!result.success) {
       console.error("게시물 로드 에러:", result.error);
@@ -220,5 +227,17 @@ export default function HomePage() {
         />
       </div>
     </ErrorBoundary>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-[var(--instagram-text-secondary)]">로딩 중...</div>
+      </div>
+    }>
+      <HomePageContent />
+    </Suspense>
   );
 }

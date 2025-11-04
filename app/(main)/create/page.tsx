@@ -22,8 +22,10 @@ export default function CreatePage() {
   };
 
   const handleSuccess = () => {
-    // 게시물 생성 성공 시 홈으로 리다이렉트
-    router.push("/home");
+    // 게시물 생성 성공 시 홈으로 리다이렉트하고 강력 새로고침 (캐시 우회)
+    const timestamp = Date.now();
+    router.push(`/home?refresh=${timestamp}`);
+    router.refresh(); // 페이지 새로고침
   };
 
   return (
