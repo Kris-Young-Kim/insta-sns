@@ -1,210 +1,422 @@
-# AGENTS.md
+# AI Agent 가이드 - INSIDE 프로젝트
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+이 문서는 AI 에이전트가 INSIDE 프로젝트를 이해하고 작업할 때 참고해야 할 핵심 정보를 제공합니다.
 
-## Tech Stack
+## 📋 목차
 
-- **Next.js 15.5.6** with React 19 and App Router
-- **Authentication**: Clerk (with Korean localization)
-- **Database**: Supabase (PostgreSQL)
-- **Styling**: Tailwind CSS v4 (uses `globals.css`, no config file)
-- **UI Components**: shadcn/ui (based on Radix UI)
-- **Icons**: lucide-react
-- **Forms**: react-hook-form + Zod
-- **Package Manager**: pnpm
-- **Language**: TypeScript (strict typing required)
+1. [프로젝트 개요](#프로젝트-개요)
+2. [문서 구조](#문서-구조)
+3. [작업 워크플로우](#작업-워크플로우)
+4. [코드 컨벤션](#코드-컨벤션)
+5. [주요 기술 스택](#주요-기술-스택)
+6. [디렉토리 구조](#디렉토리-구조)
+7. [참고 문서](#참고-문서)
 
-## Development Commands
+---
 
-```bash
-# Development server with turbopack
-pnpm dev
+## 프로젝트 개요
 
-# Production build
-pnpm build
+**INSIDE**는 Instagram 스타일의 소셜 네트워크 서비스입니다.
 
-# Start production server
-pnpm start
+### 핵심 기술 스택
 
-# Linting
-pnpm lint
+- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS v4
+- **Backend**: Supabase (PostgreSQL, Storage), Clerk (인증)
+- **Deployment**: Vercel
+
+### 주요 기능
+
+- 게시물 작성 및 공유 (이미지 + 캡션)
+- 좋아요 및 댓글 기능
+- 팔로우/언팔로우 시스템
+- 프로필 페이지
+- 완전한 반응형 디자인
+
+---
+
+## 문서 구조
+
+### 필수 참고 문서
+
+1. **`PRD.md`** - 프로젝트 요구사항 문서
+
+   - 프로젝트 목적 및 기능 요구사항
+   - 기술 스택 및 아키텍처 설계
+   - MVP 기능 목록
+
+2. **`TODO.md`** - 작업 체크리스트
+
+   - 완료된 항목과 진행 중인 항목
+   - 각 기능별 세부 작업 목록
+   - **중요**: TODO 문서의 각 섹션에 Markdown 링크가 있으면 반드시 해당 파일을 열어 확인
+
+3. **`README.md`** - 프로젝트 가이드
+
+   - 설치 및 실행 방법
+   - 환경 변수 설정
+   - 프로젝트 구조
+
+4. **`docs/design-system.md`** - 디자인 시스템 가이드
+
+   - 컬러 팔레트
+   - 폰트 체계
+   - 간격 시스템
+   - 컴포넌트 스타일 가이드
+
+5. **`docs/deployment-guide.md`** - 배포 가이드
+
+   - Vercel 배포 설정
+   - 환경 변수 설정
+   - 프로덕션 체크리스트
+
+6. **`docs/qa-checklist.md`** - QA 체크리스트
+
+   - 반응형 디자인 QA
+   - 예외 상황 처리
+   - 성능 최적화
+
+7. **`docs/extension-features-design.md`** - 2차 확장 기능 설계
+   - 향후 추가될 기능들의 설계 문서
+
+---
+
+## 작업 워크플로우
+
+### TODO 문서 작업 시
+
+TODO 문서(`TODO.md`)의 각 섹션에 Markdown 링크가 있으면, 해당 링크의 파일을 **반드시** 열어 요약한다.
+
+#### 링크 해석 규칙
+
+- **절대 경로가 주어지면**: 그대로 사용
+- **상대 경로인 경우**: 리포지터리 루트 기준으로 해석
+  - 예: `./feature/homefeed/homefeed.md` → `docs/feature/homefeed/homefeed.md`
+  - 예: `[디자인 시스템](docs/design-system.md)` → `docs/design-system.md`
+
+#### 사용 예시
+
+```
+사용자: "@TODO.md 홈피드 페이지 확인"
+→ 에이전트는 TODO.md의 관련 섹션을 확인하고, 링크된 파일이 있으면 자동으로 열어 요약
 ```
 
-## Project Architecture
+### 코드 작성 시
 
-### Clerk + Supabase Integration
+1. **기존 코드 스타일 유지**
 
-이 프로젝트는 Clerk와 Supabase의 네이티브 통합 (2025년 4월 이후 권장 방식)을 사용합니다:
+   - 프로젝트의 기존 패턴과 컨벤션을 따름
+   - 파일 상단에 JSDoc 주석 추가
 
-1. **인증 흐름**:
+2. **디자인 시스템 준수**
 
-   - Clerk가 사용자 인증 처리
-   - `SyncUserProvider`가 로그인 시 자동으로 Clerk 사용자를 Supabase `users` 테이블에 동기화
-   - Supabase 클라이언트가 Clerk 토큰을 사용하여 인증 (JWT 템플릿 불필요)
+   - CSS 변수 사용 (`var(--instagram-*)`)
+   - 폰트 크기 변수 사용 (`var(--font-size-*)`)
+   - 간격 변수 사용 (`var(--spacing-*)`)
 
-2. **Supabase 클라이언트 파일들** (`lib/supabase/`):
+3. **에러 핸들링**
 
-   - `clerk-client.ts`: Client Component용 (useClerkSupabaseClient hook)
-     - Clerk 세션 토큰으로 인증된 사용자의 데이터 접근
-     - RLS 정책이 `auth.jwt()->>'sub'`로 Clerk user ID 확인
-   - `server.ts`: Server Component/Server Action용 (createClerkSupabaseClient)
-     - 서버 사이드에서 Clerk 인증 사용
-   - `service-role.ts`: 관리자 권한 작업용 (SUPABASE_SERVICE_ROLE_KEY 사용)
-     - RLS 우회, 서버 사이드 전용
-   - `client.ts`: 인증 불필요한 공개 데이터용
-     - anon key만 사용, RLS 정책이 `to anon`인 데이터만 접근
+   - `lib/utils/error-handler.ts`의 유틸리티 함수 사용
+   - 사용자 친화적인 에러 메시지 제공
 
-3. **사용자 동기화**:
-   - `hooks/use-sync-user.ts`: Clerk → Supabase 사용자 동기화 훅
-   - `components/providers/sync-user-provider.tsx`: RootLayout에서 자동 실행
-   - `app/api/sync-user/route.ts`: 실제 동기화 로직 (API 라우트)
+4. **성능 최적화**
+   - Next.js Image 컴포넌트 사용
+   - 코드 스플리팅 고려
+   - 불필요한 리렌더링 방지
 
-### Directory Convention
+### 파일 작업 시
 
-프로젝트 파일은 `app` 외부에 저장:
+1. **새 파일 생성 전**
 
-- `app/`: 라우팅 전용 (page.tsx, layout.tsx, route.ts 등만)
-- `components/`: 재사용 가능한 컴포넌트
-  - `components/ui/`: shadcn 컴포넌트 (자동 생성, 수정 금지)
-  - `components/providers/`: React Context 프로바이더들
-- `lib/`: 유틸리티 함수 및 클라이언트 설정
-  - `lib/supabase/`: Supabase 클라이언트들 (환경별로 분리)
-  - `lib/utils.ts`: 공통 유틸리티 (cn 함수 등)
-- `hooks/`: 커스텀 React Hook들
-- `supabase/`: 데이터베이스 마이그레이션 및 설정
-  - `supabase/migrations/`: SQL 마이그레이션 파일들
-  - `supabase/config.toml`: Supabase 프로젝트 설정
+   - 기존 유사한 파일 확인
+   - 디렉토리 구조 확인
+   - 네이밍 컨벤션 확인
 
-**예정된 디렉토리** (아직 없지만 필요 시 생성):
+2. **기존 파일 수정 시**
+   - 파일 전체를 읽어 컨텍스트 파악
+   - 관련 파일들도 함께 확인
+   - 변경사항이 다른 부분에 미치는 영향 고려
 
-- `actions/`: Server Actions (API 대신 우선 사용)
-- `types/`: TypeScript 타입 정의
-- `constants/`: 상수 값들
-- `states/`: 전역 상태 (jotai 사용, 최소화)
+---
 
-### Naming Conventions
+## 코드 컨벤션
 
-- **파일명**: kebab-case (예: `use-sync-user.ts`, `sync-user-provider.tsx`)
-- **컴포넌트**: PascalCase (파일명은 여전히 kebab-case)
+### 파일명
+
+- **컴포넌트**: kebab-case (예: `post-card.tsx`, `profile-header.tsx`)
+- **유틸리티**: kebab-case (예: `error-handler.ts`)
+- **타입 정의**: kebab-case (예: `post.ts`)
+
+### 컴포넌트 구조
+
+- **파일 상단**: JSDoc 주석 (파일 설명, 주요 기능, 의존성)
+- **타입 정의**: 파일 상단 또는 별도 타입 파일
+- **컴포넌트**: 기본 export
+
+### 네이밍
+
+- **컴포넌트**: PascalCase
 - **함수/변수**: camelCase
 - **타입/인터페이스**: PascalCase
+- **상수**: UPPER_SNAKE_CASE
 
-## Database
+### 스타일링
 
-### Supabase Migrations
+- Tailwind CSS 클래스 사용
+- CSS 변수 활용 (`var(--instagram-*)`)
+- 반응형: 모바일 우선 (`sm:`, `lg:` 등)
 
-마이그레이션 파일 명명 규칙: `YYYYMMDDHHmmss_description.sql`
+---
 
-예시:
+## 주요 기술 스택
+
+### Next.js 15
+
+- **App Router** 사용
+- **Server Components** 기본, Client Components는 `"use client"` 명시
+- **API Routes**: `app/api/` 디렉토리
+
+### Supabase
+
+- **클라이언트**: `lib/supabase/clerk-client.ts` (Client Component용)
+- **서버**: `lib/supabase/server.ts` (Server Component용)
+- **서비스 역할**: `lib/supabase/service-role.ts` (관리자용)
+- **RLS**: 개발 단계에서는 비활성화
+
+### Clerk
+
+- **인증**: `@clerk/nextjs` 사용
+- **한국어 지원**: `koKR` locale 설정
+- **사용자 동기화**: 자동으로 Supabase `users` 테이블에 동기화
+
+### Tailwind CSS v4
+
+- **커스텀 변수**: `app/globals.css`에 정의
+- **Instagram 컬러 팔레트**: `var(--instagram-*)` 사용
+
+---
+
+## 디렉토리 구조
 
 ```
-supabase/migrations/20241030014800_create_users_table.sql
+insta-sns/
+├── app/                    # Next.js App Router
+│   ├── (auth)/            # 인증 관련 페이지
+│   ├── (main)/            # 메인 애플리케이션
+│   │   ├── home/         # 홈 피드
+│   │   └── profile/       # 프로필 페이지
+│   ├── api/               # API Routes
+│   │   ├── posts/        # 게시물 API
+│   │   ├── likes/        # 좋아요 API
+│   │   ├── comments/     # 댓글 API
+│   │   ├── follows/      # 팔로우 API
+│   │   └── users/        # 사용자 API
+│   ├── layout.tsx        # Root Layout
+│   └── globals.css       # 전역 스타일
+│
+├── components/            # React 컴포넌트
+│   ├── ui/               # shadcn/ui 컴포넌트
+│   ├── layout/           # 레이아웃 컴포넌트
+│   ├── post/             # 게시물 관련 컴포넌트
+│   ├── comment/          # 댓글 관련 컴포넌트
+│   ├── profile/          # 프로필 관련 컴포넌트
+│   ├── error-boundary.tsx # 에러 바운더리
+│   └── empty-state.tsx   # 빈 상태 컴포넌트
+│
+├── lib/                   # 유틸리티 및 설정
+│   ├── supabase/         # Supabase 클라이언트
+│   └── utils/            # 공통 유틸리티
+│
+├── hooks/                 # Custom React Hooks
+│   └── use-sync-user.ts  # 사용자 동기화 훅
+│
+├── supabase/             # Supabase 관련 파일
+│   └── migrations/       # 데이터베이스 마이그레이션
+│
+├── docs/                 # 문서
+│   ├── design-system.md  # 디자인 시스템 가이드
+│   ├── deployment-guide.md # 배포 가이드
+│   ├── qa-checklist.md  # QA 체크리스트
+│   └── extension-features-design.md # 2차 확장 기능 설계
+│
+├── types/                # TypeScript 타입 정의
+│   └── post.ts           # 게시물 관련 타입
+│
+├── .cursor/              # Cursor AI 규칙
+│   └── rules/           # 개발 컨벤션 및 가이드
+│
+├── vercel.json           # Vercel 배포 설정
+├── next.config.ts        # Next.js 설정
+├── PRD.md                # 프로젝트 요구사항 문서
+├── TODO.md               # 작업 체크리스트
+└── README.md             # 프로젝트 문서
 ```
 
-**중요**:
+---
 
-- 새 테이블 생성 시 반드시 Row Level Security (RLS) 활성화
-- 개발 중에는 RLS를 비활성화할 수 있으나, 프로덕션에서는 활성화 필수
-- RLS 정책은 세분화: select, insert, update, delete별로 각각 작성
-- `anon`과 `authenticated` 역할별로 별도 정책 작성
+## 참고 문서
 
-### 현재 스키마
+### 필수 읽기 순서
 
-#### 데이터베이스 테이블
+1. **`PRD.md`** - 프로젝트 요구사항 이해
+2. **`README.md`** - 프로젝트 구조 및 설정 방법
+3. **`TODO.md`** - 현재 작업 상태 확인
+4. **`docs/design-system.md`** - 디자인 시스템 이해
 
-- `users`: Clerk 사용자와 동기화되는 사용자 정보
-  - `id`: UUID (Primary Key)
-  - `clerk_id`: TEXT (Unique, Clerk User ID)
-  - `name`: TEXT
-  - `created_at`: TIMESTAMP
-  - RLS: 개발 중 비활성화 (프로덕션에서는 활성화 필요)
+### 작업별 참고 문서
 
-#### Storage 버킷
+#### 새로운 기능 개발 시
 
-- `uploads`: 사용자 파일 저장소
-  - 경로 구조: `{clerk_user_id}/{filename}`
-  - RLS 정책:
-    - INSERT: 인증된 사용자만 자신의 폴더에 업로드 가능
-    - SELECT: 인증된 사용자만 자신의 파일 조회 가능
-    - DELETE: 인증된 사용자만 자신의 파일 삭제 가능
-    - UPDATE: 인증된 사용자만 자신의 파일 업데이트 가능
-  - 정책은 `auth.jwt()->>'sub'` (Clerk user ID)로 사용자 확인
+- `PRD.md` - 기능 요구사항 확인
+- `docs/design-system.md` - 디자인 가이드 확인
+- `docs/extension-features-design.md` - 2차 확장 기능 설계 참고
 
-## Environment Variables
+#### 배포 및 배포 전 작업 시
 
-`.env.example` 참고하여 `.env` 파일 생성:
+- `docs/deployment-guide.md` - 배포 설정 확인
+- `docs/qa-checklist.md` - QA 체크리스트 확인
+- `vercel.json` - 배포 설정 확인
 
-```bash
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
-NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
+#### 코드 리뷰 및 리팩토링 시
 
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_STORAGE_BUCKET=uploads
-```
+- `.cursor/rules/` - 코드 컨벤션 확인
+- `docs/design-system.md` - 스타일 가이드 확인
 
-## Development Guidelines
+---
 
-### Server Actions vs API Routes
+## 작업 시 주의사항
 
-**우선순위**: Server Actions > API Routes
+### 1. RLS (Row Level Security)
 
-- 가능하면 항상 Server Actions 사용 (`actions/` 디렉토리)
-- API Routes는 불가피한 경우에만 사용 (웹훅, 외부 API 등)
-- 현재 `/api/sync-user`는 기존 구조상 API Route로 구현됨
+- **개발 환경**: RLS 비활성화 (규칙에 명시됨)
+- **프로덕션 환경**: RLS 활성화 필요 (설계 문서 참고)
 
-### UI Components
+### 2. 에러 핸들링
 
-1. **shadcn/ui 설치 확인**: 사용 전 `/components/ui/` 디렉토리 체크
-2. **설치 명령어**: `pnpx shadcn@latest add [component-name]`
-3. **아이콘**: lucide-react 사용 (`import { Icon } from 'lucide-react'`)
+- 네트워크 오류, 권한 오류, 빈 데이터 상황 모두 처리
+- `lib/utils/error-handler.ts`의 유틸리티 함수 활용
+- 사용자 친화적인 메시지 제공
 
-### Styling
+### 3. 성능 최적화
 
-- Tailwind CSS v4 사용 (설정은 `app/globals.css`에만)
-- `tailwind.config.js` 파일은 사용하지 않음
-- 다크/라이트 모드 지원 고려
+- Next.js Image 컴포넌트 사용 필수
+- 불필요한 리렌더링 방지
+- 코드 스플리팅 활용
 
-### TypeScript
+### 4. 반응형 디자인
 
-- 모든 코드에 타입 정의 필수
-- 인터페이스 우선, 타입은 필요시만
-- enum 대신 const 객체 사용
-- `satisfies` 연산자로 타입 검증
+- 모바일 우선 설계
+- 브레이크포인트: Mobile (320px~), Tablet (768px~), Desktop (1024px~)
+- `docs/responsive-test-guide.md` 참고
 
-### React 19 & Next.js 15 Patterns
+### 5. 로깅
+
+- 핵심 기능에 `console.log` 추가 (개발 단계)
+- 프로덕션에서는 자동 제거 (`next.config.ts` 설정)
+
+---
+
+## 자주 사용하는 패턴
+
+### API Route 작성
 
 ```typescript
-// Async Request APIs (항상 await 사용)
-const cookieStore = await cookies();
-const headersList = await headers();
-const params = await props.params;
-const searchParams = await props.searchParams;
+import { auth } from "@clerk/nextjs/server";
+import { NextRequest, NextResponse } from "next/server";
+import { createClerkSupabaseClient } from "@/lib/supabase/server";
 
-// Server Component 우선
-// 'use client'는 필요한 경우에만
+export async function POST(req: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json(
+        { error: "인증이 필요합니다." },
+        { status: 401 },
+      );
+    }
+    // ... 로직
+  } catch (error) {
+    console.error("API 에러:", error);
+    return NextResponse.json(
+      { error: "서버 오류가 발생했습니다." },
+      { status: 500 },
+    );
+  }
+}
 ```
 
-## Key Files
+### 컴포넌트 작성
 
-- `middleware.ts`: Clerk 미들웨어 (인증 라우트 보호)
-- `app/layout.tsx`: RootLayout with ClerkProvider + SyncUserProvider
-- `lib/supabase.ts`: 레거시 Supabase 클라이언트 (사용 지양, 새 파일들 사용)
-- `components.json`: shadcn/ui 설정
+```typescript
+/**
+ * @file components/example/example-component.tsx
+ * @description 컴포넌트 설명
+ */
 
-## Additional Cursor Rules
+"use client";
 
-프로젝트에는 다음 Cursor 규칙들이 있습니다:
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
-- `.cursor/rules/web/nextjs-convention.mdc`: Next.js 컨벤션
-- `.cursor/rules/web/design-rules.mdc`: UI/UX 디자인 가이드
-- `.cursor/rules/web/playwright-test-guide.mdc`: 테스트 가이드
-- `.cursor/rules/supabase/`: Supabase 관련 규칙들
+interface ExampleComponentProps {
+  // props 정의
+}
 
-주요 원칙은 이 CLAUDE.md에 통합되어 있으나, 세부사항은 해당 파일들 참고.
+export function ExampleComponent({ ... }: ExampleComponentProps) {
+  // 구현
+}
+```
+
+### 에러 처리
+
+```typescript
+import { getErrorMessage } from "@/lib/utils/error-handler";
+
+try {
+  // API 호출
+} catch (err) {
+  const errorMessage = getErrorMessage(err);
+  setError(errorMessage);
+}
+```
+
+---
+
+## 질문 및 문제 해결
+
+### 작업 전 확인 사항
+
+1. TODO.md에서 관련 항목 확인
+2. PRD.md에서 요구사항 확인
+3. 기존 유사 코드 확인
+4. 디자인 시스템 가이드 확인
+
+### 불확실한 경우
+
+- 사용자에게 명확히 질문
+- 추측 기반 구현 금지
+- 관련 문서 다시 확인
+
+### 에러 발생 시
+
+1. 에러 로그 확인
+2. 관련 파일 전체 읽기
+3. 웹 검색 또는 공식 문서 확인
+4. 최대 3회 수정 시도 후 사용자에게 도움 요청
+
+---
+
+## 참고 링크
+
+- [Next.js 15 문서](https://nextjs.org/docs)
+- [Clerk 문서](https://clerk.com/docs)
+- [Supabase 문서](https://supabase.com/docs)
+- [Tailwind CSS v4 문서](https://tailwindcss.com/docs)
+- [shadcn/ui 문서](https://ui.shadcn.com/)
+
+---
+
+## 마지막 업데이트
+
+- **날짜**: 2025-01-XX
+- **버전**: MVP 완료
+- **상태**: 프로덕션 배포 준비 완료
