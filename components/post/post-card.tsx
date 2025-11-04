@@ -65,6 +65,8 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
 
   // 좋아요 토글
   const handleLike = async () => {
+    console.log("PostCard: 좋아요 버튼 클릭", { postId: post.id, currentLiked: isLiked });
+    
     const newLikedState = !isLiked;
     
     // 낙관적 업데이트
@@ -80,13 +82,17 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
     // API 호출
     if (onLike) {
       try {
+        console.log("PostCard: 좋아요 API 호출 시작");
         await onLike(post.id);
+        console.log("PostCard: 좋아요 API 호출 성공");
       } catch (error) {
         // 실패 시 롤백
         setIsLiked(!newLikedState);
         setLikesCount(prev => newLikedState ? prev - 1 : prev + 1);
-        console.error("좋아요 처리 실패:", error);
+        console.error("PostCard: 좋아요 처리 실패:", error);
       }
+    } else {
+      console.warn("PostCard: onLike 콜백이 없습니다");
     }
   };
 
@@ -200,7 +206,10 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
 
             {/* 댓글 아이콘 */}
             <button
-              onClick={() => onCommentClick?.(post.id)}
+              onClick={() => {
+                console.log("PostCard: 댓글 버튼 클릭", { postId: post.id, hasCallback: !!onCommentClick });
+                onCommentClick?.(post.id);
+              }}
               className="hover:opacity-50 transition-opacity ripple"
               aria-label="댓글"
             >
@@ -208,13 +217,45 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
             </button>
 
             {/* 공유 아이콘 */}
-            <button className="hover:opacity-50 transition-opacity ripple" aria-label="공유">
+            <button
+              onClick={() => {
+                console.log("PostCard: 공유 버튼 클릭", { postId: post.id });
+                // 공유 기능 구현 (Web Share API 또는 클립보드 복사)
+                if (navigator.share) {
+                  navigator.share({
+                    title: `${post.user?.name || "사용자"}님의 게시물`,
+                    text: post.caption || "",
+                    url: window.location.href,
+                  }).catch((err) => {
+                    console.log("공유 취소됨:", err);
+                  });
+                } else {
+                  // Web Share API를 지원하지 않는 경우 클립보드에 링크 복사
+                  navigator.clipboard.writeText(window.location.href).then(() => {
+                    console.log("링크가 클립보드에 복사되었습니다");
+                    // TODO: 토스트 메시지 표시 (선택사항)
+                  }).catch((err) => {
+                    console.error("클립보드 복사 실패:", err);
+                  });
+                }
+              }}
+              className="hover:opacity-50 transition-opacity ripple"
+              aria-label="공유"
+            >
               <Send size={24} className="text-[var(--instagram-text)]" />
             </button>
           </div>
 
           {/* 북마크 아이콘 */}
-          <button className="hover:opacity-50 transition-opacity ripple" aria-label="저장">
+          <button
+            onClick={() => {
+              console.log("PostCard: 북마크 버튼 클릭", { postId: post.id });
+              // TODO: 북마크 기능 구현 (향후 기능)
+              alert("북마크 기능은 곧 제공될 예정입니다.");
+            }}
+            className="hover:opacity-50 transition-opacity ripple"
+            aria-label="저장"
+          >
             <Bookmark size={24} className="text-[var(--instagram-text)]" />
           </button>
         </div>

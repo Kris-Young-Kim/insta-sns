@@ -37,6 +37,15 @@ export function PostFeed({
   const [page, setPage] = useState(1);
   const observerTarget = useRef<HTMLDivElement>(null);
 
+  // initialPosts가 변경되면 내부 상태도 업데이트
+  useEffect(() => {
+    console.log("PostFeed: initialPosts 변경됨", { count: initialPosts.length, posts: initialPosts });
+    setPosts(initialPosts);
+    // 초기 게시물이 로드되면 페이지를 1로 리셋
+    setPage(1);
+    setHasMore(initialPosts.length > 0);
+  }, [initialPosts]);
+
   // 좋아요 처리
   const handleLike = useCallback(
     async (postId: string) => {

@@ -12,7 +12,10 @@ import { createClerkSupabaseClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   try {
+    console.log("=== 게시물 조회 API 시작 ===");
     const { userId } = await auth();
+    console.log("Clerk userId:", userId);
+    
     const supabase = await createClerkSupabaseClient();
 
     // 쿼리 파라미터
@@ -22,17 +25,21 @@ export async function GET(req: NextRequest) {
     const showAll = searchParams.get("all") === "true"; // 탐색 페이지용: 모든 게시물 조회
     const offset = (page - 1) * limit;
 
+    console.log("쿼리 파라미터:", { page, limit, showAll, offset });
+
     // 현재 사용자 정보 조회 (팔로우한 사용자 확인용)
     let currentUserId: string | null = null;
     let followingUserIds: string[] = [];
 
     if (userId && !showAll) {
       // 탐색 페이지가 아닌 경우에만 팔로우 필터 적용
-      const { data: currentUserData } = await supabase
+      const { data: currentUserData, error: userError } = await supabase
         .from("users")
         .select("id")
         .eq("clerk_id", userId)
         .single();
+
+      console.log("사용자 조회 결과:", { currentUserData, userError });
 
       if (currentUserData) {
         currentUserId = currentUserData.id;
@@ -44,6 +51,7 @@ export async function GET(req: NextRequest) {
           .eq("follower_id", currentUserId);
 
         followingUserIds = followsData?.map((f) => f.following_id) || [];
+        console.log("팔로우한 사용자:", followingUserIds);
       }
     } else if (userId && showAll) {
       // 탐색 페이지인 경우: 좋아요 여부 확인을 위해 사용자 ID만 조회
@@ -82,6 +90,14 @@ export async function GET(req: NextRequest) {
 
     const { data: postsData, error: postsError } = await query;
 
+    console.log("게시물 조회 결과:", {
+      postsCount: postsData?.length || 0,
+      postsError,
+      currentUserId,
+      followingUserIds,
+      showAll,
+    });
+
     if (postsError) {
       console.error("게시물 조회 에러:", postsError);
       return NextResponse.json(
@@ -91,36 +107,55 @@ export async function GET(req: NextRequest) {
     }
 
     // 각 게시물의 통계 및 좋아요 여부 조회
+    console.log("게시물 통계 조회 시작, 게시물 수:", postsData?.length || 0);
+    
     const postsWithStats = await Promise.all(
       (postsData || []).map(async (post) => {
-        // 통계 조회
-        const { data: statsData } = await supabase
-          .from("post_stats")
-          .select("likes_count, comments_count")
-          .eq("post_id", post.id)
-          .single();
-
-        // 현재 사용자의 좋아요 여부 확인
-        let isLiked = false;
-        if (currentUserId) {
-          const { data: likeData } = await supabase
-            .from("likes")
-            .select("id")
+        try {
+          // 통계 조회
+          const { data: statsData, error: statsError } = await supabase
+            .from("post_stats")
+            .select("likes_count, comments_count")
             .eq("post_id", post.id)
-            .eq("user_id", currentUserId)
             .single();
 
-          isLiked = !!likeData;
-        }
+          if (statsError) {
+            console.warn(`게시물 ${post.id} 통계 조회 실패:`, statsError);
+          }
 
-        return {
-          ...post,
-          likes_count: statsData?.likes_count || 0,
-          comments_count: statsData?.comments_count || 0,
-          is_liked: isLiked,
-        };
+          // 현재 사용자의 좋아요 여부 확인
+          let isLiked = false;
+          if (currentUserId) {
+            const { data: likeData } = await supabase
+              .from("likes")
+              .select("id")
+              .eq("post_id", post.id)
+              .eq("user_id", currentUserId)
+              .single();
+
+            isLiked = !!likeData;
+          }
+
+          return {
+            ...post,
+            likes_count: statsData?.likes_count || 0,
+            comments_count: statsData?.comments_count || 0,
+            is_liked: isLiked,
+          };
+        } catch (err) {
+          console.error(`게시물 ${post.id} 처리 중 에러:`, err);
+          // 에러가 발생해도 기본값으로 반환
+          return {
+            ...post,
+            likes_count: 0,
+            comments_count: 0,
+            is_liked: false,
+          };
+        }
       })
     );
+
+    console.log("게시물 통계 조회 완료, 처리된 게시물 수:", postsWithStats.length);
 
     // 총 게시물 수 조회 (페이지네이션을 위해)
     let countQuery = supabase.from("posts").select("*", { count: "exact", head: true });

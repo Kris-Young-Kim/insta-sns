@@ -34,12 +34,23 @@ function HomePageContent() {
   }, [pathname, searchParams]);
 
   const loadInitialPosts = async () => {
+    console.log("=== 홈 페이지 게시물 로드 시작 ===");
     setIsLoading(true);
     setError(null);
 
     // 캐시 우회를 위한 timestamp 추가
     const timestamp = Date.now();
-    const result = await apiGet<Post[]>(`/api/posts?page=1&limit=10&_t=${timestamp}`);
+    const url = `/api/posts?page=1&limit=10&_t=${timestamp}`;
+    console.log("API 호출 URL:", url);
+    
+    const result = await apiGet<Post[]>(url);
+    console.log("API 응답 결과:", {
+      success: result.success,
+      dataLength: result.data?.length ?? "undefined",
+      dataType: Array.isArray(result.data) ? "array" : typeof result.data,
+      error: result.error,
+      fullResult: result,
+    });
 
     if (!result.success) {
       console.error("게시물 로드 에러:", result.error);
@@ -51,6 +62,12 @@ function HomePageContent() {
     // API 응답 구조 확인: api-client가 이미 { success: true, data: Post[] } 형식을 파싱했으므로
     // result.data는 Post[] 타입이어야 함
     const postsData = Array.isArray(result.data) ? result.data : [];
+    console.log("최종 게시물 데이터:", {
+      count: postsData.length,
+      isEmpty: postsData.length === 0,
+      posts: postsData,
+      firstPost: postsData[0] || null,
+    });
     setPosts(postsData);
     setIsLoading(false);
   };
