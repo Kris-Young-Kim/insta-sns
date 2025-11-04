@@ -204,7 +204,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="py-4">
+    <div className="py-4 page-transition">
       {/* 프로필 헤더 */}
       <ProfileHeader
         user={profileData.user}

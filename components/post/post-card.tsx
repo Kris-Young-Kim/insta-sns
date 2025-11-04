@@ -179,13 +179,16 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
             {/* 하트 아이콘 */}
             <button
               onClick={handleLike}
-              className="hover:opacity-50 transition-all active:scale-110"
+              className="hover:opacity-50 transition-all active:scale-110 ripple"
               aria-label={isLiked ? "좋아요 취소" : "좋아요"}
             >
               {isLiked ? (
                 <Heart
                   size={24}
                   className="text-[var(--instagram-heart)] fill-[var(--instagram-heart)] transition-all"
+                  style={{
+                    animation: "heartClick 0.4s ease-out",
+                  }}
                 />
               ) : (
                 <Heart
@@ -198,20 +201,20 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
             {/* 댓글 아이콘 */}
             <button
               onClick={() => onCommentClick?.(post.id)}
-              className="hover:opacity-50 transition-opacity"
+              className="hover:opacity-50 transition-opacity ripple"
               aria-label="댓글"
             >
               <MessageCircle size={24} className="text-[var(--instagram-text)]" />
             </button>
 
             {/* 공유 아이콘 */}
-            <button className="hover:opacity-50 transition-opacity" aria-label="공유">
+            <button className="hover:opacity-50 transition-opacity ripple" aria-label="공유">
               <Send size={24} className="text-[var(--instagram-text)]" />
             </button>
           </div>
 
           {/* 북마크 아이콘 */}
-          <button className="hover:opacity-50 transition-opacity" aria-label="저장">
+          <button className="hover:opacity-50 transition-opacity ripple" aria-label="저장">
             <Bookmark size={24} className="text-[var(--instagram-text)]" />
           </button>
         </div>
