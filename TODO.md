@@ -5,8 +5,8 @@
 - [x] Next.js 15 + TypeScript + Tailwind CSS v4 프로젝트 초기화 확인
 - [x] Supabase 프로젝트 생성 및 연결 (환경변수 설정)
 - [x] Clerk 인증 연동 (이메일+소셜 로그인, 한글화 설정)
-- [ ] Tailwind CSS에 Instagram 기반 컬러·폰트 커스텀 변수 설정
-- [ ] 디렉토리 구조 생성: `app/(auth)`, `app/(main)`, `components/layout`, `components/post`, `components/comment`, `components/profile`
+- [x] Tailwind CSS에 Instagram 기반 컬러·폰트 커스텀 변수 설정
+- [x] 디렉토리 구조 생성: `app/(auth)`, `app/(main)`, `components/layout`, `components/post`, `components/comment`, `components/profile`
 
 ## 2. DB/스토리지 구조 설계 및 구축
 
