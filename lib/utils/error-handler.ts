@@ -11,9 +11,33 @@
  */
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
+    // 타임아웃 오류
+    if (
+      error.name === "AbortError" ||
+      error.message.includes("timeout") ||
+      error.message.includes("시간이 초과")
+    ) {
+      return "요청 시간이 초과되었습니다. 네트워크 연결을 확인하고 다시 시도해주세요.";
+    }
+
     // 네트워크 오류
-    if (error.message.includes("fetch") || error.message.includes("network")) {
+    if (
+      error.message.includes("fetch") ||
+      error.message.includes("network") ||
+      error.message.includes("Failed to fetch") ||
+      error.message.includes("NetworkError")
+    ) {
       return "네트워크 연결을 확인해주세요. 인터넷 연결이 불안정할 수 있습니다.";
+    }
+
+    // JSON 파싱 오류
+    if (
+      error.message.includes("JSON") ||
+      error.message.includes("parse") ||
+      error.message.includes("Unexpected token") ||
+      error.message.includes("invalid json")
+    ) {
+      return "서버 응답을 처리할 수 없습니다. 서버 오류가 발생했을 수 있습니다.";
     }
 
     // 권한 오류
@@ -72,7 +96,37 @@ export function isNetworkError(error: unknown): boolean {
     return (
       error.message.includes("fetch") ||
       error.message.includes("network") ||
-      error.message.includes("Failed to fetch")
+      error.message.includes("Failed to fetch") ||
+      error.message.includes("NetworkError")
+    );
+  }
+  return false;
+}
+
+/**
+ * 타임아웃 오류 확인
+ */
+export function isTimeoutError(error: unknown): boolean {
+  if (error instanceof Error) {
+    return (
+      error.name === "AbortError" ||
+      error.message.includes("timeout") ||
+      error.message.includes("시간이 초과")
+    );
+  }
+  return false;
+}
+
+/**
+ * JSON 파싱 오류 확인
+ */
+export function isJsonParseError(error: unknown): boolean {
+  if (error instanceof Error) {
+    return (
+      error.message.includes("JSON") ||
+      error.message.includes("parse") ||
+      error.message.includes("Unexpected token") ||
+      error.message.includes("invalid json")
     );
   }
   return false;
