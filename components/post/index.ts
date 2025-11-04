@@ -6,4 +6,4 @@
 export { PostCard } from "./post-card";
 export { PostFeed } from "./post-feed";
 export { PostFeedSkeleton } from "./post-feed-skeleton";
-
+export { CreatePostModal } from "./create-post-modal";
