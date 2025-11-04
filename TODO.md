@@ -101,13 +101,13 @@
 
 ## 13. API Route 구축
 
-- [ ] `/api/posts` - GET (목록 조회, 페이지네이션), POST (생성)
-- [ ] `/api/likes` - POST (좋아요), DELETE (좋아요 취소)
-- [ ] `/api/comments` - POST (댓글 작성), DELETE (댓글 삭제)
-- [ ] `/api/follows` - POST (팔로우), DELETE (언팔로우)
-- [ ] `/api/users/[userId]` - GET (사용자 정보 조회)
-- [ ] 모든 API에 Clerk 인증 미들웨어 적용
-- [ ] 에러 핸들링 및 응답 형식 통일
+- [x] `/api/posts` - GET (목록 조회, 페이지네이션), POST (생성)
+- [x] `/api/likes` - POST (좋아요), DELETE (좋아요 취소)
+- [x] `/api/comments` - POST (댓글 작성), DELETE (댓글 삭제)
+- [x] `/api/follows` - POST (팔로우), DELETE (언팔로우)
+- [x] `/api/users/[userId]` - GET (사용자 정보 조회)
+- [x] 모든 API에 Clerk 인증 미들웨어 적용
+- [x] 에러 핸들링 및 응답 형식 통일
 
 ## 14. 애니메이션 및 UI/UX 개선
 
