@@ -25,10 +25,66 @@ export default function HomePage() {
     return [];
   };
 
-  // 좋아요 처리 함수 (나중에 API로 교체)
+  // 좋아요 처리 함수
   const handleLike = async (postId: string): Promise<void> => {
-    // TODO: 실제 API 호출로 교체
-    console.log("좋아요:", postId);
+    try {
+      // 현재 게시물의 좋아요 상태 확인 (임시로 posts 상태에서 찾기)
+      const currentPost = posts.find((p) => p.id === postId);
+      const isCurrentlyLiked = currentPost?.is_liked || false;
+
+      if (isCurrentlyLiked) {
+        // 좋아요 취소
+        const response = await fetch(`/api/likes?post_id=${postId}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) {
+          throw new Error("좋아요 취소에 실패했습니다.");
+        }
+
+        // 로컬 상태 업데이트
+        setPosts((prev) =>
+          prev.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  is_liked: false,
+                  likes_count: Math.max(0, (post.likes_count || 0) - 1),
+                }
+              : post
+          )
+        );
+      } else {
+        // 좋아요 추가
+        const response = await fetch("/api/likes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ post_id: postId }),
+        });
+
+        if (!response.ok) {
+          throw new Error("좋아요 추가에 실패했습니다.");
+        }
+
+        // 로컬 상태 업데이트
+        setPosts((prev) =>
+          prev.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  is_liked: true,
+                  likes_count: (post.likes_count || 0) + 1,
+                }
+              : post
+          )
+        );
+      }
+    } catch (error) {
+      console.error("좋아요 처리 에러:", error);
+      throw error; // PostCard에서 롤백 처리
+    }
   };
 
   // 댓글 클릭 처리

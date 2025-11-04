@@ -15,7 +15,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from "lucide-react";
@@ -24,7 +24,7 @@ import { Post, Comment } from "@/types/post";
 interface PostCardProps {
   post: Post;
   comments?: Comment[];
-  onLike?: (postId: string) => void;
+  onLike?: (postId: string) => Promise<void>;
   onCommentClick?: (postId: string) => void;
 }
 
@@ -32,6 +32,9 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
   const [isLiked, setIsLiked] = useState(post.is_liked || false);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
+  const lastTapRef = useRef(0);
+  const imageRef = useRef<HTMLDivElement>(null);
 
   // 캡션이 2줄을 초과하는지 확인 (대략 100자 기준)
   const shouldTruncateCaption = post.caption && post.caption.length > 100;
@@ -61,12 +64,46 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
   const timeAgo = formatTimeAgo(post.created_at);
 
   // 좋아요 토글
-  const handleLike = () => {
-    if (onLike) {
-      onLike(post.id);
+  const handleLike = async () => {
+    const newLikedState = !isLiked;
+    
+    // 낙관적 업데이트
+    setIsLiked(newLikedState);
+    setLikesCount(prev => newLikedState ? prev + 1 : prev - 1);
+
+    // 애니메이션 표시
+    if (newLikedState) {
+      setShowHeartAnimation(true);
+      setTimeout(() => setShowHeartAnimation(false), 600);
     }
-    setIsLiked(!isLiked);
-    setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+
+    // API 호출
+    if (onLike) {
+      try {
+        await onLike(post.id);
+      } catch (error) {
+        // 실패 시 롤백
+        setIsLiked(!newLikedState);
+        setLikesCount(prev => newLikedState ? prev - 1 : prev + 1);
+        console.error("좋아요 처리 실패:", error);
+      }
+    }
+  };
+
+  // 더블탭 제스처 처리
+  const handleDoubleTap = () => {
+    const now = Date.now();
+    const DOUBLE_TAP_DELAY = 300;
+
+    if (lastTapRef.current && now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+      // 더블탭 감지
+      if (!isLiked) {
+        handleLike();
+      }
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
+    }
   };
 
   return (
@@ -106,7 +143,11 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
       </header>
 
       {/* 이미지: 정사각형 비율 */}
-      <div className="relative w-full aspect-square bg-[var(--instagram-bg-secondary)]">
+      <div
+        ref={imageRef}
+        className="relative w-full aspect-square bg-[var(--instagram-bg-secondary)] cursor-pointer select-none"
+        onDoubleClick={handleDoubleTap}
+      >
         <Image
           src={post.image_url}
           alt={post.caption || "게시물 이미지"}
@@ -114,7 +155,21 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 630px"
           priority={false}
+          draggable={false}
         />
+        
+        {/* 더블탭 하트 애니메이션 */}
+        {showHeartAnimation && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <Heart
+              size={80}
+              className="text-[var(--instagram-heart)] fill-[var(--instagram-heart)] animate-ping"
+              style={{
+                animation: "heartPulse 0.6s ease-out",
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* 액션 바: 하트, 댓글, 공유 */}
@@ -124,13 +179,19 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
             {/* 하트 아이콘 */}
             <button
               onClick={handleLike}
-              className="hover:opacity-50 transition-opacity"
+              className="hover:opacity-50 transition-all active:scale-110"
               aria-label={isLiked ? "좋아요 취소" : "좋아요"}
             >
               {isLiked ? (
-                <Heart size={24} className="text-[var(--instagram-heart)] fill-[var(--instagram-heart)]" />
+                <Heart
+                  size={24}
+                  className="text-[var(--instagram-heart)] fill-[var(--instagram-heart)] transition-all"
+                />
               ) : (
-                <Heart size={24} className="text-[var(--instagram-text)]" />
+                <Heart
+                  size={24}
+                  className="text-[var(--instagram-text)] transition-all"
+                />
               )}
             </button>
 
