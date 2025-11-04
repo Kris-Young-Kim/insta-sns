@@ -191,6 +191,7 @@ export function CreatePostModal({
                 사진 선택
               </Button>
               <input
+                id="create-post-file-input"
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
@@ -221,10 +222,14 @@ export function CreatePostModal({
 
           {/* 캡션 입력 */}
           <div className="space-y-2 flex-1">
-            <label className="text-[var(--font-size-sm)] font-medium text-[var(--instagram-text)] block">
+            <label 
+              htmlFor="create-post-caption"
+              className="text-[var(--font-size-sm)] font-medium text-[var(--instagram-text)] block"
+            >
               캡션
             </label>
             <Textarea
+              id="create-post-caption"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               placeholder="캡션을 입력하세요..."

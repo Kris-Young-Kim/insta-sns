@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -18,6 +18,7 @@ interface CommentFormProps {
 }
 
 export function CommentForm({ postId, onSubmit, placeholder = "댓글 달기..." }: CommentFormProps) {
+  const commentInputId = useId();
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -40,6 +41,7 @@ export function CommentForm({ postId, onSubmit, placeholder = "댓글 달기..."
   return (
     <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-[var(--instagram-border)] px-4 py-3">
       <input
+        id={commentInputId}
         type="text"
         value={content}
         onChange={(e) => setContent(e.target.value)}
