@@ -35,13 +35,13 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-4 px-3 py-2 rounded-lg transition-colors ${
+              className={`flex items-center gap-4 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 ${
                 isActive
                   ? "text-[var(--instagram-text)] font-semibold"
                   : "text-[var(--instagram-text)] hover:bg-[var(--instagram-bg-secondary)]"
               }`}
             >
-              <Icon size={24} />
+              <Icon size={24} className="transition-transform duration-200" />
               <span className="text-[var(--font-size-base)]">{item.label}</span>
             </Link>
           );
@@ -58,13 +58,13 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`p-2 rounded-lg transition-all duration-200 hover:scale-110 ${
                 isActive
                   ? "text-[var(--instagram-text)]"
                   : "text-[var(--instagram-text-secondary)] hover:bg-[var(--instagram-bg-secondary)]"
               }`}
             >
-              <Icon size={24} />
+              <Icon size={24} className="transition-transform duration-200" />
             </Link>
           );
         })}

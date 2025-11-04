@@ -14,7 +14,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Post, Comment } from "@/types/post";
 import { CommentForm, CommentList } from "@/components/comment";
 import { useClerkSupabaseClient } from "@/lib/supabase/clerk-client";
@@ -99,6 +99,10 @@ export function PostModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden sm:max-w-4xl">
+        {/* 접근성을 위한 숨겨진 제목 */}
+        <DialogTitle className="sr-only">
+          {post.user?.name || "사용자"}님의 게시물
+        </DialogTitle>
         <div className="flex flex-col sm:flex-row h-[90vh] max-h-[90vh]">
           {/* 이미지 영역 (50% 너비, 왼쪽) */}
           <div className="w-full sm:w-1/2 h-1/2 sm:h-full relative bg-[var(--instagram-bg-secondary)]">
