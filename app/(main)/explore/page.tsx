@@ -37,10 +37,9 @@ export default function ExplorePage() {
     // 현재는 같은 API를 사용하되, 로그인하지 않은 사용자처럼 모든 게시물 조회
     const result = await apiGet<Post[]>("/api/posts?page=1&limit=10&all=true");
 
-    if (!result.success) {
-      const errorMessage = result.error;
-      console.error("게시물 로드 에러:", errorMessage);
-      setError(errorMessage);
+    if (result.success === false) {
+      console.error("게시물 로드 에러:", result.error);
+      setError(result.error);
       setIsLoading(false);
       return;
     }
@@ -54,7 +53,7 @@ export default function ExplorePage() {
   const loadPosts = async (page: number): Promise<Post[]> => {
     const result = await apiGet<Post[]>(`/api/posts?page=${page}&limit=10&all=true`);
 
-    if (!result.success) {
+    if (result.success === false) {
       console.error("게시물 로드 에러:", result.error);
       throw new Error(result.error);
     }
@@ -71,7 +70,7 @@ export default function ExplorePage() {
       // 좋아요 취소
       const result = await apiDelete(`/api/likes?post_id=${postId}`);
 
-      if (!result.success) {
+      if (result.success === false) {
         console.error("좋아요 취소 에러:", result.error);
         throw new Error(result.error);
       }
@@ -91,7 +90,7 @@ export default function ExplorePage() {
       // 좋아요 추가
       const result = await apiPost("/api/likes", { post_id: postId });
 
-      if (!result.success) {
+      if (result.success === false) {
         console.error("좋아요 추가 에러:", result.error);
         throw new Error(result.error);
       }
@@ -126,7 +125,7 @@ export default function ExplorePage() {
       content,
     });
 
-    if (!result.success) {
+    if (result.success === false) {
       console.error("댓글 작성 에러:", result.error);
       throw new Error(result.error);
     }
@@ -147,7 +146,7 @@ export default function ExplorePage() {
   const handleCommentDelete = async (commentId: string): Promise<void> => {
     const result = await apiDelete(`/api/comments?comment_id=${commentId}`);
 
-    if (!result.success) {
+    if (result.success === false) {
       console.error("댓글 삭제 에러:", result.error);
       throw new Error(result.error);
     }

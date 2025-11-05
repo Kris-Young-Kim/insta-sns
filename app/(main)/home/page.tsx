@@ -48,14 +48,13 @@ function HomePageContent() {
       success: result.success,
       dataLength: result.success ? result.data?.length ?? "undefined" : undefined,
       dataType: result.success ? (Array.isArray(result.data) ? "array" : typeof result.data) : undefined,
-      error: !result.success ? result.error : undefined,
+      error: result.success === false ? result.error : undefined,
       fullResult: result,
     });
 
-    if (!result.success) {
-      const errorMessage = result.error;
-      console.error("게시물 로드 에러:", errorMessage);
-      setError(errorMessage);
+    if (result.success === false) {
+      console.error("게시물 로드 에러:", result.error);
+      setError(result.error);
       setIsLoading(false);
       return;
     }
@@ -77,7 +76,7 @@ function HomePageContent() {
   const loadPosts = async (page: number): Promise<Post[]> => {
     const result = await apiGet<Post[]>(`/api/posts?page=${page}&limit=10`);
 
-    if (!result.success) {
+    if (result.success === false) {
       console.error("게시물 로드 에러:", result.error);
       throw new Error(result.error);
     }
@@ -97,7 +96,7 @@ function HomePageContent() {
       // 좋아요 취소
       const result = await apiDelete(`/api/likes?post_id=${postId}`);
 
-      if (!result.success) {
+      if (result.success === false) {
         console.error("좋아요 취소 에러:", result.error);
         throw new Error(result.error);
       }
@@ -118,7 +117,7 @@ function HomePageContent() {
       // 좋아요 추가
       const result = await apiPost("/api/likes", { post_id: postId });
 
-      if (!result.success) {
+      if (result.success === false) {
         console.error("좋아요 추가 에러:", result.error);
         throw new Error(result.error);
       }
@@ -154,7 +153,7 @@ function HomePageContent() {
       content,
     });
 
-    if (!result.success) {
+    if (result.success === false) {
       console.error("댓글 작성 에러:", result.error);
       throw new Error(result.error);
     }
@@ -176,7 +175,7 @@ function HomePageContent() {
   const handleCommentDelete = async (commentId: string): Promise<void> => {
     const result = await apiDelete(`/api/comments?comment_id=${commentId}`);
 
-    if (!result.success) {
+    if (result.success === false) {
       console.error("댓글 삭제 에러:", result.error);
       throw new Error(result.error);
     }
