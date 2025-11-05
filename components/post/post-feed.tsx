@@ -24,6 +24,7 @@ interface PostFeedProps {
   onLike?: (postId: string) => Promise<void>;
   onCommentClick?: (postId: string) => void;
   onDelete?: (postId: string) => void;
+  onUpdate?: (updatedPost: Post) => void;
 }
 
 export function PostFeed({
@@ -32,6 +33,7 @@ export function PostFeed({
   onLike,
   onCommentClick,
   onDelete,
+  onUpdate,
 }: PostFeedProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +63,23 @@ export function PostFeed({
       }
     },
     [onLike]
+  );
+
+  // 게시물 수정 처리
+  const handleUpdate = useCallback(
+    (updatedPost: Post) => {
+      console.log("PostFeed: 게시물 수정", { postId: updatedPost.id });
+      // 목록에서 수정된 게시물 업데이트
+      setPosts((prev) =>
+        prev.map((post) => (post.id === updatedPost.id ? updatedPost : post))
+      );
+      
+      // 부모 컴포넌트에 수정 알림
+      if (onUpdate) {
+        onUpdate(updatedPost);
+      }
+    },
+    [onUpdate]
   );
 
   // 게시물 삭제 처리
@@ -154,6 +173,7 @@ export function PostFeed({
           onLike={handleLike}
           onCommentClick={onCommentClick}
           onDelete={handleDelete}
+          onUpdate={handleUpdate}
         />
       ))}
 

@@ -23,6 +23,7 @@ import { useUser } from "@clerk/nextjs";
 import { useClerkSupabaseClient } from "@/lib/supabase/clerk-client";
 import { Post, Comment } from "@/types/post";
 import { CommentList } from "@/components/comment";
+import { EditPostModal } from "./edit-post-modal";
 
 interface PostCardProps {
   post: Post;
@@ -30,9 +31,10 @@ interface PostCardProps {
   onLike?: (postId: string) => Promise<void>;
   onCommentClick?: (postId: string) => void;
   onDelete?: (postId: string) => void;
+  onUpdate?: (updatedPost: Post) => void;
 }
 
-export function PostCard({ post, comments = [], onLike, onCommentClick, onDelete }: PostCardProps) {
+export function PostCard({ post, comments = [], onLike, onCommentClick, onDelete, onUpdate }: PostCardProps) {
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
   const [isLiked, setIsLiked] = useState(post.is_liked || false);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
@@ -40,6 +42,7 @@ export function PostCard({ post, comments = [], onLike, onCommentClick, onDelete
   const [showMenu, setShowMenu] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const lastTapRef = useRef(0);
   const imageRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -448,6 +451,19 @@ export function PostCard({ post, comments = [], onLike, onCommentClick, onDelete
           )}
         </div>
       </div>
+
+      {/* 게시물 수정 모달 */}
+      <EditPostModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        post={post}
+        onSuccess={(updatedPost) => {
+          console.log("PostCard: 게시물 수정 성공", { postId: updatedPost.id });
+          if (onUpdate) {
+            onUpdate(updatedPost);
+          }
+        }}
+      />
     </article>
   );
 }

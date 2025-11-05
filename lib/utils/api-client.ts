@@ -206,3 +206,22 @@ export async function apiDelete<T>(
   return apiRequest<T>(url, { ...options, method: "DELETE" });
 }
 
+/**
+ * PUT 요청 헬퍼 함수
+ */
+export async function apiPut<T>(
+  url: string,
+  body?: unknown,
+  options?: Omit<ApiRequestOptions, "method" | "body">
+): Promise<ApiResponse<T>> {
+  return apiRequest<T>(url, {
+    ...options,
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+

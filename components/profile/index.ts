@@ -5,4 +5,5 @@
 
 export { ProfileHeader } from "./profile-header";
 export { PostGrid } from "./post-grid";
+export { FollowListModal } from "./follow-list-modal";
 

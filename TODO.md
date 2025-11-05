@@ -92,6 +92,7 @@
 - [x] PostGrid: 3열 그리드 레이아웃
 - [x] 게시물 호버 시 좋아요/댓글 수 표시
 - [x] API Route: `/api/users/[userId]` (GET)
+- [x] 팔로워/팔로잉 목록 모달 기능
 
 ## 12. 팔로우/언팔로우 기능
 
@@ -99,15 +100,23 @@
 - [x] 언팔로우 기능
 - [x] 즉시 UI 반영 (낙관적 업데이트)
 - [x] API Route: `/api/follows` (POST, DELETE)
+- [x] 팔로워 목록 조회 기능
+- [x] 팔로잉 목록 조회 기능
+- [x] 팔로워/팔로잉 목록 조회 API 구현 (`/api/users/[userId]/followers`, `/api/users/[userId]/following`)
+- [x] FollowListModal 컴포넌트 생성
+- [x] ProfileHeader에 팔로워/팔로잉 클릭 이벤트 연결
+- [x] 모달에서 사용자 프로필 이동 기능
 
 ## 13. API Route 구축
 
 - [x] `/api/posts` - GET (목록 조회, 페이지네이션), POST (생성)
-- [x] `/api/posts/[postId]` - DELETE (게시물 삭제)
+- [x] `/api/posts/[postId]` - PUT (게시물 수정), DELETE (게시물 삭제)
 - [x] `/api/likes` - POST (좋아요), DELETE (좋아요 취소)
 - [x] `/api/comments` - POST (댓글 작성), DELETE (댓글 삭제)
 - [x] `/api/follows` - POST (팔로우), DELETE (언팔로우)
 - [x] `/api/users/[userId]` - GET (사용자 정보 조회)
+- [x] `/api/users/[userId]/followers` - GET (팔로워 목록 조회)
+- [x] `/api/users/[userId]/following` - GET (팔로잉 목록 조회)
 - [x] 모든 API에 Clerk 인증 미들웨어 적용
 - [x] 에러 핸들링 및 응답 형식 통일
 
@@ -148,4 +157,8 @@
 - [x] PostCard에 작성자 전용 드롭다운 메뉴 추가
 - [x] 게시물 삭제 API 구현 (`/api/posts/[postId]`)
 - [x] 삭제 후 목록에서 즉시 제거 기능
-- [ ] 게시물 수정 기능 (향후 구현 예정)
+- [x] 게시물 수정 기능
+- [x] 게시물 수정 API 구현 (`PUT /api/posts/[postId]`)
+- [x] EditPostModal 컴포넌트 생성
+- [x] PostCard에 수정 기능 연결
+- [x] 수정 후 목록 업데이트 기능

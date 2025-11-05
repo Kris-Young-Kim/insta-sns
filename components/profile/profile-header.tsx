@@ -20,6 +20,8 @@ interface ProfileHeaderProps {
   isFollowing?: boolean;
   onFollow?: () => void;
   onUnfollow?: () => void;
+  onFollowersClick?: () => void;
+  onFollowingClick?: () => void;
 }
 
 export function ProfileHeader({
@@ -31,6 +33,8 @@ export function ProfileHeader({
   isFollowing = false,
   onFollow,
   onUnfollow,
+  onFollowersClick,
+  onFollowingClick,
 }: ProfileHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-6 px-4 py-6">
@@ -92,7 +96,10 @@ export function ProfileHeader({
               게시물
             </span>
           </div>
-          <button className="flex items-center gap-1 hover:opacity-50">
+          <button
+            onClick={onFollowersClick}
+            className="flex items-center gap-1 hover:opacity-50 cursor-pointer"
+          >
             <span className="text-[var(--font-size-base)] font-semibold text-[var(--instagram-text)]">
               {followersCount.toLocaleString()}
             </span>
@@ -100,7 +107,10 @@ export function ProfileHeader({
               팔로워
             </span>
           </button>
-          <button className="flex items-center gap-1 hover:opacity-50">
+          <button
+            onClick={onFollowingClick}
+            className="flex items-center gap-1 hover:opacity-50 cursor-pointer"
+          >
             <span className="text-[var(--font-size-base)] font-semibold text-[var(--instagram-text)]">
               {followingCount.toLocaleString()}
             </span>

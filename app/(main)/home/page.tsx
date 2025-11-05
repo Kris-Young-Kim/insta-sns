@@ -206,6 +206,20 @@ function HomePageContent() {
     }
   };
 
+  // 게시물 수정 처리
+  const handlePostUpdate = (updatedPost: Post) => {
+    console.log("홈 페이지: 게시물 수정", { postId: updatedPost.id });
+    // 목록에서 수정된 게시물 업데이트
+    setPosts((prev) =>
+      prev.map((post) => (post.id === updatedPost.id ? updatedPost : post))
+    );
+    
+    // 선택된 게시물이 수정된 경우 모달도 업데이트
+    if (selectedPost?.id === updatedPost.id) {
+      setSelectedPost(updatedPost);
+    }
+  };
+
   if (error) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -232,6 +246,7 @@ function HomePageContent() {
             onLike={handleLike}
             onCommentClick={handleCommentClick}
             onDelete={handlePostDelete}
+            onUpdate={handlePostUpdate}
           />
         ) : posts.length === 0 ? (
           <EmptyState
@@ -246,6 +261,7 @@ function HomePageContent() {
             onLike={handleLike}
             onCommentClick={handleCommentClick}
             onDelete={handlePostDelete}
+            onUpdate={handlePostUpdate}
           />
         )}
 

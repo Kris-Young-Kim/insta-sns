@@ -11,7 +11,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import { ProfileHeader, PostGrid } from "@/components/profile";
+import { ProfileHeader, PostGrid, FollowListModal } from "@/components/profile";
 import { Post, User } from "@/types/post";
 import { PostModal } from "@/components/post";
 
@@ -37,6 +37,8 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
+  const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
 
   // 프로필 데이터 로드
   useEffect(() => {
@@ -215,6 +217,8 @@ export default function ProfilePage() {
         isFollowing={profileData.isFollowing}
         onFollow={handleFollow}
         onUnfollow={handleUnfollow}
+        onFollowersClick={() => setIsFollowersModalOpen(true)}
+        onFollowingClick={() => setIsFollowingModalOpen(true)}
       />
 
       {/* 게시물 그리드 */}
@@ -229,6 +233,22 @@ export default function ProfilePage() {
         onOpenChange={setIsModalOpen}
         onCommentSubmit={handleCommentSubmit}
         onCommentDelete={handleCommentDelete}
+      />
+
+      {/* 팔로워 목록 모달 */}
+      <FollowListModal
+        open={isFollowersModalOpen}
+        onOpenChange={setIsFollowersModalOpen}
+        userId={userId}
+        type="followers"
+      />
+
+      {/* 팔로잉 목록 모달 */}
+      <FollowListModal
+        open={isFollowingModalOpen}
+        onOpenChange={setIsFollowingModalOpen}
+        userId={userId}
+        type="following"
       />
     </div>
   );
