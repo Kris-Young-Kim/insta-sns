@@ -15,10 +15,12 @@
 
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from "lucide-react";
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Trash2, Edit } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import { useClerkSupabaseClient } from "@/lib/supabase/clerk-client";
 import { Post, Comment } from "@/types/post";
 import { CommentList } from "@/components/comment";
 
@@ -27,15 +29,22 @@ interface PostCardProps {
   comments?: Comment[];
   onLike?: (postId: string) => Promise<void>;
   onCommentClick?: (postId: string) => void;
+  onDelete?: (postId: string) => void;
 }
 
-export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCardProps) {
+export function PostCard({ post, comments = [], onLike, onCommentClick, onDelete }: PostCardProps) {
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
   const [isLiked, setIsLiked] = useState(post.is_liked || false);
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const lastTapRef = useRef(0);
   const imageRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { user } = useUser();
+  const supabase = useClerkSupabaseClient();
 
   // 캡션이 2줄을 초과하는지 확인 (대략 100자 기준)
   const shouldTruncateCaption = post.caption && post.caption.length > 100;
@@ -44,6 +53,97 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
     : post.caption;
 
   // 댓글 미리보기는 CommentList 컴포넌트에서 처리
+
+  // 현재 사용자가 게시물 작성자인지 확인
+  useEffect(() => {
+    const checkOwnership = async () => {
+      if (!user) {
+        setIsOwner(false);
+        return;
+      }
+
+      try {
+        // Supabase users 테이블에서 현재 사용자 ID 조회
+        const { data: userData } = await supabase
+          .from("users")
+          .select("id")
+          .eq("clerk_id", user.id)
+          .single();
+
+        if (userData && userData.id === post.user_id) {
+          setIsOwner(true);
+          console.log("PostCard: 현재 사용자가 게시물 작성자입니다", { postId: post.id });
+        } else {
+          setIsOwner(false);
+        }
+      } catch (error) {
+        console.error("PostCard: 소유자 확인 중 에러:", error);
+        setIsOwner(false);
+      }
+    };
+
+    checkOwnership();
+  }, [user, post.user_id, post.id, supabase]);
+
+  // 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showMenu]);
+
+  // 게시물 삭제 핸들러
+  const handleDelete = async () => {
+    if (!isOwner) {
+      console.warn("PostCard: 삭제 권한이 없습니다");
+      return;
+    }
+
+    if (!confirm("정말 이 게시물을 삭제하시겠습니까?")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    console.log("PostCard: 게시물 삭제 시작", { postId: post.id });
+
+    try {
+      const response = await fetch(`/api/posts/${post.id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "게시물 삭제에 실패했습니다.");
+      }
+
+      console.log("PostCard: 게시물 삭제 성공", { postId: post.id });
+      
+      // 부모 컴포넌트에 삭제 알림
+      if (onDelete) {
+        onDelete(post.id);
+      } else {
+        // onDelete 콜백이 없으면 페이지 새로고침
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("PostCard: 게시물 삭제 실패:", error);
+      alert(error instanceof Error ? error.message : "게시물 삭제에 실패했습니다.");
+    } finally {
+      setIsDeleting(false);
+      setShowMenu(false);
+    }
+  };
 
   // 시간 포맷팅
   const formatTimeAgo = (dateString: string): string => {
@@ -142,10 +242,48 @@ export function PostCard({ post, comments = [], onLike, onCommentClick }: PostCa
           </div>
         </div>
 
-        {/* 메뉴 버튼 (3점) */}
-        <button className="p-1 hover:opacity-50">
-          <MoreHorizontal size={20} className="text-[var(--instagram-text)]" />
-        </button>
+        {/* 메뉴 버튼 (3점) - 작성자만 표시 */}
+        {isOwner && (
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="p-1 hover:opacity-50 transition-opacity"
+              aria-label="메뉴"
+            >
+              <MoreHorizontal size={20} className="text-[var(--instagram-text)]" />
+            </button>
+
+            {/* 드롭다운 메뉴 */}
+            {showMenu && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-[var(--instagram-bg)] border border-[var(--instagram-border)] rounded-lg shadow-lg z-50">
+                <div className="py-1">
+                  {/* 수정 버튼 (향후 구현) */}
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      // TODO: 게시물 수정 기능 구현
+                      alert("게시물 수정 기능은 곧 제공될 예정입니다.");
+                    }}
+                    className="w-full px-4 py-3 text-left text-[var(--font-size-sm)] text-[var(--instagram-text)] hover:bg-[var(--instagram-bg-secondary)] flex items-center gap-3 transition-colors"
+                  >
+                    <Edit size={16} />
+                    <span>수정</span>
+                  </button>
+
+                  {/* 삭제 버튼 */}
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="w-full px-4 py-3 text-left text-[var(--font-size-sm)] text-red-500 hover:bg-[var(--instagram-bg-secondary)] flex items-center gap-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 size={16} />
+                    <span>{isDeleting ? "삭제 중..." : "삭제"}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       {/* 이미지: 정사각형 비율 */}

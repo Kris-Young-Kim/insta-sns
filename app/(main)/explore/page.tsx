@@ -38,8 +38,9 @@ export default function ExplorePage() {
     const result = await apiGet<Post[]>("/api/posts?page=1&limit=10&all=true");
 
     if (!result.success) {
-      console.error("게시물 로드 에러:", result.error);
-      setError(result.error);
+      const errorMessage = result.error;
+      console.error("게시물 로드 에러:", errorMessage);
+      setError(errorMessage);
       setIsLoading(false);
       return;
     }
@@ -163,6 +164,19 @@ export default function ExplorePage() {
     }
   };
 
+  // 게시물 삭제 처리
+  const handlePostDelete = (postId: string) => {
+    console.log("탐색 페이지: 게시물 삭제", { postId });
+    // 목록에서 삭제된 게시물 제거
+    setPosts((prev) => prev.filter((post) => post.id !== postId));
+    
+    // 선택된 게시물이 삭제된 경우 모달 닫기
+    if (selectedPost?.id === postId) {
+      setSelectedPost(null);
+      setIsModalOpen(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -188,6 +202,7 @@ export default function ExplorePage() {
             onLoadMore={loadPosts}
             onLike={handleLike}
             onCommentClick={handleCommentClick}
+            onDelete={handlePostDelete}
           />
         ) : posts.length === 0 ? (
           <EmptyState
@@ -201,6 +216,7 @@ export default function ExplorePage() {
             onLoadMore={loadPosts}
             onLike={handleLike}
             onCommentClick={handleCommentClick}
+            onDelete={handlePostDelete}
           />
         )}
 

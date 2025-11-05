@@ -21,6 +21,13 @@ interface ApiErrorResponse {
 
 type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
 
+/**
+ * 타입 가드: ApiErrorResponse인지 확인
+ */
+export function isApiError<T>(response: ApiResponse<T>): response is ApiErrorResponse {
+  return !response.success;
+}
+
 interface ApiRequestOptions extends RequestInit {
   timeout?: number;
 }

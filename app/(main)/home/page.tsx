@@ -46,15 +46,16 @@ function HomePageContent() {
     const result = await apiGet<Post[]>(url);
     console.log("API 응답 결과:", {
       success: result.success,
-      dataLength: result.data?.length ?? "undefined",
-      dataType: Array.isArray(result.data) ? "array" : typeof result.data,
-      error: result.error,
+      dataLength: result.success ? result.data?.length ?? "undefined" : undefined,
+      dataType: result.success ? (Array.isArray(result.data) ? "array" : typeof result.data) : undefined,
+      error: !result.success ? result.error : undefined,
       fullResult: result,
     });
 
     if (!result.success) {
-      console.error("게시물 로드 에러:", result.error);
-      setError(result.error);
+      const errorMessage = result.error;
+      console.error("게시물 로드 에러:", errorMessage);
+      setError(errorMessage);
       setIsLoading(false);
       return;
     }
@@ -193,6 +194,19 @@ function HomePageContent() {
     }
   };
 
+  // 게시물 삭제 처리
+  const handlePostDelete = (postId: string) => {
+    console.log("홈 페이지: 게시물 삭제", { postId });
+    // 목록에서 삭제된 게시물 제거
+    setPosts((prev) => prev.filter((post) => post.id !== postId));
+    
+    // 선택된 게시물이 삭제된 경우 모달 닫기
+    if (selectedPost?.id === postId) {
+      setSelectedPost(null);
+      setIsModalOpen(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -218,6 +232,7 @@ function HomePageContent() {
             onLoadMore={loadPosts}
             onLike={handleLike}
             onCommentClick={handleCommentClick}
+            onDelete={handlePostDelete}
           />
         ) : posts.length === 0 ? (
           <EmptyState
@@ -231,6 +246,7 @@ function HomePageContent() {
             onLoadMore={loadPosts}
             onLike={handleLike}
             onCommentClick={handleCommentClick}
+            onDelete={handlePostDelete}
           />
         )}
 

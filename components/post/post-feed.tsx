@@ -23,6 +23,7 @@ interface PostFeedProps {
   onLoadMore?: (page: number) => Promise<Post[]>;
   onLike?: (postId: string) => Promise<void>;
   onCommentClick?: (postId: string) => void;
+  onDelete?: (postId: string) => void;
 }
 
 export function PostFeed({
@@ -30,6 +31,7 @@ export function PostFeed({
   onLoadMore,
   onLike,
   onCommentClick,
+  onDelete,
 }: PostFeedProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,6 +61,21 @@ export function PostFeed({
       }
     },
     [onLike]
+  );
+
+  // 게시물 삭제 처리
+  const handleDelete = useCallback(
+    (postId: string) => {
+      console.log("PostFeed: 게시물 삭제", { postId });
+      // 목록에서 삭제된 게시물 제거
+      setPosts((prev) => prev.filter((post) => post.id !== postId));
+      
+      // 부모 컴포넌트에 삭제 알림
+      if (onDelete) {
+        onDelete(postId);
+      }
+    },
+    [onDelete]
   );
 
   // 더 많은 게시물 로드
@@ -136,6 +153,7 @@ export function PostFeed({
           comments={[]} // 댓글은 나중에 API에서 가져올 수 있음
           onLike={handleLike}
           onCommentClick={onCommentClick}
+          onDelete={handleDelete}
         />
       ))}
 
