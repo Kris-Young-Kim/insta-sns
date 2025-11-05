@@ -44,9 +44,11 @@ INSIDE는 Instagram의 컬러 스키마를 기반으로 하며, Tailwind CSS 커
 </div>
 
 // 인라인 스타일 사용
+{% raw %}
 <div style={{ color: 'var(--instagram-text)' }}>
   텍스트
 </div>
+{% endraw %}
 ```
 
 ## 2. 폰트 체계
@@ -95,6 +97,7 @@ Instagram 스타일의 행간은 다음과 같이 사용합니다:
 </span>
 
 // 인라인 스타일 사용
+{% raw %}
 <h1 style={{ 
   fontSize: 'var(--font-size-2xl)', 
   fontWeight: 'var(--font-weight-bold)',
@@ -102,6 +105,7 @@ Instagram 스타일의 행간은 다음과 같이 사용합니다:
 }}>
   제목
 </h1>
+{% endraw %}
 ```
 
 ## 3. 간격 시스템 (Spacing Scale)
@@ -127,12 +131,14 @@ Instagram 스타일의 간격 시스템입니다.
 </div>
 
 // 인라인 스타일 사용
+{% raw %}
 <div style={{ 
   padding: 'var(--spacing-md)',
   marginBottom: 'var(--spacing-lg)'
 }}>
   콘텐츠
 </div>
+{% endraw %}
 ```
 
 ## 4. Border Radius
@@ -264,6 +270,7 @@ Instagram 스타일의 간격 시스템입니다.
 </div>
 
 // 인라인 스타일 (CSS 변수 활용)
+{% raw %}
 <div style={{
   padding: 'var(--spacing-sm)',
   '@media (min-width: 768px)': {
@@ -272,6 +279,7 @@ Instagram 스타일의 간격 시스템입니다.
 }}>
   콘텐츠
 </div>
+{% endraw %}
 ```
 
 ## 8. 접근성 가이드라인
